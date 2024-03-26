@@ -142,10 +142,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GTException.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="VolWnd.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WinMsgMap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FormulaCalc.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

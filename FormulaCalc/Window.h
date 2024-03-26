@@ -7,6 +7,7 @@
 #include <sstream>
 #include "GTException.h"
 #include "Widget.h"
+#include "resource.h"
 //#include "VolWnd.h"
 
 //HINSTANCE hInst = GetModuleHandle(NULL);
@@ -129,7 +130,7 @@ public:
 		wc.hIcon = NULL;
 		wc.hCursor = nullptr;
 		wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-		wc.lpszMenuName = NULL;
+		wc.lpszMenuName = MAKEINTRESOURCE(hMenu);
 		wc.lpszClassName = ClassName();
 		wc.hIconSm = NULL;
 		RegisterClassEx(&wc);
@@ -144,7 +145,7 @@ public:
 			nWidth, 
 			nHeight, 
 			hWndParent, 
-			hMenu, 
+			NULL, 
 			GetModuleHandle(NULL), 
 			this
 		);
@@ -152,7 +153,7 @@ public:
 		// Check for error.
 		if (m_hWnd == nullptr)
 		{
-			MessageBox(m_hWnd, "Failure..", "Window Failed", MB_OK);
+			MessageBox(m_hWnd,  "Window Failed", "Failure..", MB_OK);
 			//throw GTWND_LAST_EXCEPT();
 		}
 
