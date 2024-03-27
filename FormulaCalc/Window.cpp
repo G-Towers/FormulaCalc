@@ -7,8 +7,51 @@
 BOOL VolWnd::wndCreated = 0;
 VolWnd* pVolWnd = nullptr;
 VolWnd* VolWnd::inst = nullptr;
+HINSTANCE hInst = GetModuleHandle(NULL);
 
 //pVolWnd = reinterpret_cast<VolWnd*>(GetWindowLongPtr(VolWnd::volObj.GetWinHandle(), GWLP_USERDATA));
+
+// Message handler for about box.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+
+	}
+	return (INT_PTR)FALSE;
+}
+
+// Message handler for Info box.
+INT_PTR CALLBACK Info(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+
+	}
+	return (INT_PTR)FALSE;
+}
 
 LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -16,13 +59,43 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	//static WinMsgMap mm;
 	//OutputDebugString(mm(uMsg, wParam, lParam).c_str());
 
+	int wmId = LOWORD(wParam);
+
 	switch (uMsg)
 	{
 	case WM_COMMAND:
 	{
+		// Combo box.
 		ComboBoxCommand(m_hWnd, uMsg, wParam, lParam);
+
+		// Parse the menu selections:
+		switch (wmId)
+		{
+		case ID_HELP_ABOUT:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), m_hWnd, About);
+			break;
+
+		case ID_HELP_INFO:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), m_hWnd, Info);
+			break;
+
+		case ID_CALCULATE_VOLUME:
+			VolWnd::volObj.VolumeWnd();	
+			break;
+
+		case ID_FILE_EXIT:
+			if (MessageBox(m_hWnd, " Are you sure you want to quit?", "Quit?", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+			{
+				PostQuitMessage(0);
+			}
+			return 0;
+
+		default:
+			return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+		}
 	}
 	break;
+
 	case WM_CREATE:
 		// Call to the interface function.
 		MainInterface(m_hWnd, GetModuleHandle(NULL));
@@ -106,8 +179,8 @@ void MainWindow::ComboBoxList(HWND hWnd)
 
 void MainWindow::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	MSG volMsg = { 0 };
-	BOOL gResult;
+	//MSG volMsg = { 0 };
+	//BOOL gResult;
 
 	char Item1[100] = "";
 	char Item2[100] = "";
@@ -143,21 +216,21 @@ void MainWindow::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		else if (ItemIndex == (WPARAM)2)
 		{
 			//SetWindowText(hWnd, Item3);
-			//MessageBox(hWnd, "Item 3 Selected", (LPCSTR)ListItem, MB_OK);
+			MessageBox(hWnd, "Item 3 Selected", (LPCSTR)ListItem, MB_OK);
 			//WinObject();
 			//WinFunction();
-			{
+			//{
 				// Singleton instantiation.
 				//VolWnd& volumeWin = VolWnd::instVolWnd();
 
-				if (VolWnd::volObj.wndCreated)
-					SetFocus(VolWnd::volObj.GetWinHandle());
-				else
-				{
-					VolWnd::volObj.CreateWnd("Volume Window", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE, 
-						0, 250, 250, 480, 350, GetParent(hWnd));
-					ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
-					VolWnd::volObj.wndCreated = 1;
+				//if (VolWnd::volObj.wndCreated)
+				//	SetFocus(VolWnd::volObj.GetWinHandle());
+				//else
+				//{
+				//	VolWnd::volObj.CreateWnd("Volume Window", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE, 
+				//		0, 250, 250, 480, 350, GetParent(hWnd));
+				//	ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
+				//	VolWnd::volObj.wndCreated = 1;
 
 					// Extract ptr to window class from creation data.
 					//const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
@@ -175,8 +248,8 @@ void MainWindow::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 					//	}
 					//}
 					//return (int)volMsg.wParam;
-				}
-			}
+				//}
+			//}
 		}
 		else
 		{

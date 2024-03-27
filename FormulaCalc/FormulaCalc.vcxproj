@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GTException.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="VolWnd.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="Window.h" />

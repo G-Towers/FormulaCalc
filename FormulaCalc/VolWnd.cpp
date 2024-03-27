@@ -270,27 +270,19 @@ void VolWnd::VolPyramidInterface()
 	volObj.hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_PYRAMID_BUTTON);
 }
 
-void VolWnd::VolumeWndObj(VolWnd& obj)
+void VolWnd::VolumeWnd()
 {
-	//Window volWnd(400, 200, "Volume Calculator");
-	//VolWnd volWin();
 
-	ShowWindow(obj.GetWinHandle(), SW_SHOW);
-
-	// Run the message loop.
-	MSG msg = { 0 };
-
-	while (GetMessage(&msg, NULL, 0, 0))
+	if (VolWnd::volObj.wndCreated)
+		SetFocus(VolWnd::volObj.GetWinHandle());
+	else
 	{
-		// To use tabstops.
-		if (!IsDialogMessage(obj.GetWinHandle(), &msg))
-		{
-			TranslateMessage(&msg); // Translate virtual-key messages into character messages.
-			DispatchMessage(&msg);  // Send message to windows procedure.
-		}
+		VolWnd::volObj.CreateWnd("Volume Window", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
+			0, 250, 250, 480, 350, GetParent(m_hWnd));
+		ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
+		VolWnd::volObj.wndCreated = 1;
 	}
-
-	//return (int)msg.wParam;
+	
 }
 
 void VolWnd::ClearVolumeText()

@@ -7,12 +7,13 @@
 #include <sstream>
 #include "GTException.h"
 #include "Widget.h"
-#include "resource.h"
-//#include "VolWnd.h"
-
-//HINSTANCE hInst = GetModuleHandle(NULL);
+#include "Resource.h"
 
 //VolWnd& volumeWin = VolWnd::instVolWnd();
+
+// Dialog Box Procs
+INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK Info(HWND, UINT, WPARAM, LPARAM);
 
 template <class DERIVED_TYPE>
 class BaseWindow

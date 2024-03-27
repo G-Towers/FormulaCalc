@@ -12,7 +12,7 @@
 #define VOLUME_CALCULATE_SPHERE_BUTTON		40012
 #define VOLUME_CALCULATE_CYLINDER_BUTTON	40013
 #define VOLUME_CALCULATE_CONE_BUTTON		40014
-#define VOLUME_CALCULATE_FRUSTUM_BUTTON	40015
+#define VOLUME_CALCULATE_FRUSTUM_BUTTON		40015
 #define VOLUME_CALCULATE_PYRAMID_BUTTON		40016
 
 class VolWnd : public BaseWindow<VolWnd>
@@ -53,8 +53,8 @@ public:
 	void VolPyramidInterface();
 	// Labels and text boxes for pyramid volume calculation.
 
-	void VolumeWndObj(VolWnd& obj);
-	// experiment with window objects.
+	void VolumeWnd();
+	// Creates the Volume Window.
 
 	void ClearVolumeText();
 	// Clears all text boxes and resets the combobox.
