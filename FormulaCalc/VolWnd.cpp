@@ -97,7 +97,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	//	return DLGC_WANTTAB;
 
 	//case WM_KEYDOWN:
-	//	if (IsDialogMessage(m_hWnd, &msg)) // call IsDialogMessage with the window handle and the message
+	//	if (IsDialogMessage(volObj.GetWinHandle(), (LPMSG)&uMsg)) // call IsDialogMessage with the window handle and the message
 	//	{
 	//		return 0; // the message has been processed by IsDialogMessage
 	//	}
