@@ -145,6 +145,7 @@ void MainWindow::MainInterface(const HWND& hWnd, const HINSTANCE hInst)
 {
 	HWND hComboBoxSelItem = Widget::ComboBox(25, 25, 265, 150, "", hWnd, hInst);	// The combobox window.
 	ComboBoxList(hComboBoxSelItem);	// Items in the combobox.
+	HWND hRadBut = Widget::ButtonRadio(120, 120, 80, 30, "Button", hWnd);
 }
 
 void MainWindow::ComboBoxList(HWND hWnd)

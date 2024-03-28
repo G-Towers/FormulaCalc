@@ -76,13 +76,24 @@ HWND Widget::Button(int posx, int posy, int width, int height, const char* text,
 
 HWND Widget::ButtonDef(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option)
 {
-	HWND BtnDef_hWnd = CreateWindow(
+	HWND btnDef_hWnd = CreateWindow(
 		"BUTTON",
 		text,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_DEFPUSHBUTTON,
 		posx, posy, width, height, hWnd, option, nullptr, nullptr);
 
-	return BtnDef_hWnd;
+	return btnDef_hWnd;
+}
+
+HWND Widget::ButtonRadio(int posx, int posy, int width, int height, const char* text, HWND hWnd)
+{
+	HWND btnRad_hWnd = CreateWindow(
+		"BUTTON",
+		text,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,
+		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
+
+	return btnRad_hWnd;
 }
 
 HWND Widget::ResultBox(int posx, int posy, int width, int height, HWND hWnd)
