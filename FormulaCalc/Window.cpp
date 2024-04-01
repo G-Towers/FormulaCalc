@@ -2,9 +2,10 @@
 
 #include "Window.h"
 #include "VolWnd.h"
+#include "StanDev.h"
 #include "WinMsgMap.h"
 
-BOOL VolWnd::wndCreated = 0;
+BOOL VolWnd::volWndCreated = 0;
 VolWnd* pVolWnd = nullptr;
 VolWnd* VolWnd::inst = nullptr;
 HINSTANCE hInst = GetModuleHandle(NULL);
@@ -81,6 +82,10 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case ID_CALCULATE_VOLUME:
 			VolWnd::volObj.VolumeWnd();	
+			break;
+
+		case ID_STATISTICS_STANDARDDEVIATION:
+			StanDev::stanDevObj.StanDevWnd();
 			break;
 
 		case ID_FILE_EXIT:

@@ -72,7 +72,7 @@ public:
 
 	~VolWnd();
 
-	static BOOL wndCreated;	// Volume window is created.
+	static BOOL volWndCreated;	// Volume window is created.
 
 public:
 	double length, base, height, width, radius,

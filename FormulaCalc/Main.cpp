@@ -19,7 +19,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	{
 		MainWindow mainWin;
 
-		mainWin.CreateWnd("Main Window", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 150, 150, 500, 500, 
+		mainWin.CreateWnd("Formula Calculator", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 150, 150, 500, 500, 
 			 NULL, (HMENU)IDR_MENU1);
 
 		ShowWindow(mainWin.GetWinHandle(), nCmdShow);

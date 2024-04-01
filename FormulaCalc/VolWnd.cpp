@@ -113,7 +113,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		DestroyWindow(m_hWnd);
 		UnregisterClass("VolWndClass", GetModuleHandle(NULL));
-		wndCreated = 0;
+		volWndCreated = 0;
 		//PostQuitMessage(0);
 		return 0;
 
@@ -273,14 +273,14 @@ void VolWnd::VolPyramidInterface()
 void VolWnd::VolumeWnd()
 {
 
-	if (VolWnd::volObj.wndCreated)
+	if (VolWnd::volObj.volWndCreated)
 		SetFocus(VolWnd::volObj.GetWinHandle());
 	else
 	{
-		VolWnd::volObj.CreateWnd("Volume Window", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
+		VolWnd::volObj.CreateWnd("Volume", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
 			0, 250, 250, 480, 350, GetParent(m_hWnd));
 		ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
-		VolWnd::volObj.wndCreated = 1;
+		VolWnd::volObj.volWndCreated = 1;
 	}
 	
 }

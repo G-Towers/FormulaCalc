@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="GTException.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="StanDev.cpp" />
     <ClCompile Include="VolWnd.cpp" />
     <ClCompile Include="Widget.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -143,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="GTException.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="StanDev.h" />
     <ClInclude Include="VolWnd.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="Window.h" />
