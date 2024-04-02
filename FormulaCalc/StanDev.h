@@ -21,8 +21,10 @@ public:
 	// Singleton to instantiate an object only once.
 
 	void InitDlg(HWND hWndOwner, HWND hDlg);
+	// Initializes a dialog box.
 
-	static HINSTANCE GetInstance() noexcept;	// Gets the handle to the instance.
+	static HINSTANCE GetInstance() noexcept;
+	// Gets the handle to the instance.
 
 	void StanDevInterface();
 	// The Standard Deviation Window interface.
@@ -30,7 +32,10 @@ public:
 	void StanDevWnd();
 	// Creates the Standard Deviation Window.
 
-	static BOOL sdWndCreated;
+	void CalculateDev(const double arr[], int sizeUsed, double& avg, double& dev);
+	// Calculates the standard deviation.
+
+	static BOOL sdWndCreated;	// Flag for window created.
 
 public:
 	

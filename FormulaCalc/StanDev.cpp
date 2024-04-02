@@ -165,4 +165,31 @@ void StanDev::StanDevWnd()
     }
 }
 
+void StanDev::CalculateDev(const double arr[], int sizeUsed, double& avg, double& dev)
+{
+    // Declare variables.
+    double next = 0.0,
+        avgSum = 0.0,
+        devSum = 0.0;
+
+    int avgCount = 0,
+        devCount = 0;
+
+    // Read all the numbers in the array, add them up and calculate the average.
+    for (int i = 0; i < sizeUsed; i++)
+    {
+        avgSum += arr[i];
+        avgCount++;
+    }
+    avg = avgSum / avgCount;    // Calculate the average.
+
+    // Read all the numbers in the array to calculate the standard deviation.
+    for (int i = 0; i < sizeUsed; i++)
+    {
+        devSum += pow(arr[i] - avg, 2);
+        devCount++;
+    }
+    dev = sqrt(devSum / (devCount));    // Or for Sample (devCount - 1).
+}
+
 
