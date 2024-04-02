@@ -39,4 +39,31 @@ public:
 	static StanDev stanDevObj;
 	static StanDev* inst;	// To use with InstVolWnd().
 
+	// variables
+	int count;
+	double dev;
+	double mean;
+	double sum;
+
+	// Radio Buttons
+	HWND hPopBtn;
+	HWND hSampBtn;
+
+	// Labels
+	HWND hInputLabel;
+	HWND hSumLabel;
+	HWND hMeanLabel;
+	HWND hDevResultLabel;
+
+	// Input/result
+	HWND hStanDevInput;
+	HWND hSumResult;
+	HWND hMeanResult;
+	HWND hStanDevResult;
+
+	// Buttons.
+	HWND hCalcBtn;
+	HWND hClearBtn;
+	HWND hCloseBtn;
+
 };

@@ -8,6 +8,29 @@ BOOL StanDev::sdWndCreated = 0;
 StanDev::StanDev()
 {
     hInst = GetModuleHandle(NULL);
+
+    count = 0;
+    dev = 0.0;
+    mean = 0.0;
+    sum = 0.0;
+
+    hPopBtn = nullptr;
+    hSampBtn = nullptr;
+
+    hInputLabel = nullptr;
+    hSumLabel = nullptr;
+    hMeanLabel = nullptr;
+    hDevResultLabel = nullptr;
+
+    hStanDevInput = nullptr;
+    hSumResult = nullptr;
+    hMeanResult = nullptr;
+    hStanDevResult = nullptr;
+    
+    hCalcBtn = nullptr;
+    hClearBtn = nullptr;
+    hCloseBtn = nullptr;
+
 }
 
 StanDev::~StanDev()
@@ -23,7 +46,7 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         break;
     case WM_CREATE:
-
+        StanDevInterface();
         break;
     case WM_SETFOCUS:
         SetFocus(m_hWnd);
@@ -104,7 +127,29 @@ HINSTANCE StanDev::GetInstance() noexcept
 
 void StanDev::StanDevInterface()
 {
+    // Radio Buttons
+    stanDevObj.hPopBtn = Widget::ButtonRadio(30, 20, 150, 30, "Population", m_hWnd, NULL);
+    stanDevObj.hSampBtn = Widget::ButtonRadio(30, 50, 150, 30, "Sample", m_hWnd, NULL);
 
+    // Labels
+    stanDevObj.hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
+    stanDevObj.hInputLabel = Widget::RLabel(60, 135, 150, 30, "Sum of Squares:", m_hWnd);
+    stanDevObj.hInputLabel = Widget::RLabel(60, 175, 150, 30, "Mean:", m_hWnd);
+    stanDevObj.hDevResultLabel = Widget::RLabel(60, 215, 150, 30, "Standard Deviation:", m_hWnd);
+
+    // input/result Boxes.
+    stanDevObj.hStanDevInput = Widget::InputBox(70, 90, 230, 30, m_hWnd);      // Input.
+
+    stanDevObj.hSumResult = Widget::ResultBox(220, 130, 80, 30, m_hWnd);        // Sum.
+    stanDevObj.hMeanResult = Widget::ResultBox(220, 170, 80, 30, m_hWnd);       // Mean
+    stanDevObj.hStanDevResult = Widget::ResultBox(220, 210, 80, 30, m_hWnd);    // Standard Deviation.
+
+    // Buttons.
+    stanDevObj.hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)VOLUME_CLEAR_BUTTON);
+    stanDevObj.hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
+
+    // Calculate.
+    stanDevObj.hCalcBtn = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)STANDEV_CALCULATE);
 }
 
 void StanDev::StanDevWnd()
