@@ -10,9 +10,13 @@ StanDev::StanDev()
     hInst = GetModuleHandle(NULL);
 
     count = 0;
+    arrSize = 0;
     dev = 0.0;
     mean = 0.0;
-    sum = 0.0;
+    meanSum = 0.0;
+    devSum = 0.0;
+    
+    arr = new double[arrSize];
 
     hPopBtn = nullptr;
     hSampBtn = nullptr;
@@ -40,16 +44,54 @@ StanDev::~StanDev()
 
 LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    int wmId = LOWORD(wParam);
+    int wmEvent = HIWORD(wParam);
+
     switch (uMsg)
     {
     case WM_COMMAND:
+        switch (wmId)
+        {
+        //case STANDEV_POP_RADIO:
+        //    if (wmEvent == BN_CLICKED)
+        //        CalcStanDevPop();
+        //    break;
+        //case STANDEV_SMPL_RADIO:
+        //    if (wmEvent == BN_CLICKED)
+        //        CalcStanDevSmpl();
+        //    break;
+        case STANDEV_CALCULATE:
+            if (wmEvent == BN_CLICKED)
+            {
+                BOOL sdPopChecked = SendMessage(GetDlgItem(m_hWnd, STANDEV_POP_RADIO), 
+                    BM_GETCHECK, 0, 0) == BST_CHECKED;
+                BOOL sdSmplChecked = SendMessage(GetDlgItem(m_hWnd, STANDEV_SMPL_RADIO),
+                    BM_GETCHECK, 0, 0) == BST_CHECKED;
+                if (sdPopChecked)
+                    CalcStanDevPop();
+                else if (sdSmplChecked)
+                    CalcStanDevSmpl();
 
+            }
+            break;
+
+        case STANDEV_CLEAR_BUTTON:
+
+            break;
+        case STANDEV_CLOSE_BUTTON:
+            DestroyWindow(m_hWnd);
+            UnregisterClass("VolWndClass", GetModuleHandle(NULL));
+            sdWndCreated = 0;
+            return 0;
+            //break;
+         }
         break;
+
     case WM_CREATE:
         StanDevInterface();
         break;
     case WM_SETFOCUS:
-        SetFocus(m_hWnd);
+        SetFocus(stanDevObj.hStanDevInput);
         break;
     case WM_DESTROY:
         DestroyWindow(m_hWnd);
@@ -82,44 +124,6 @@ StanDev& StanDev::InstStanDevWnd()
     return *inst;
 }
 
-void StanDev::InitDlg(HWND hWndOwner, HWND hDlg)
-{
-    //HWND hwndOwner;
-    RECT rc, rcDlg, rcOwner;
-
-    // Get the owner window and dialog box rectangles. 
-
-    if ((hWndOwner = GetParent(hDlg)) == NULL)
-    {
-        hWndOwner = GetDesktopWindow();
-    }
-
-    GetWindowRect(hWndOwner, &rcOwner);
-    GetWindowRect(hDlg, &rcDlg);
-    CopyRect(&rc, &rcOwner);
-
-    // Offset the owner and dialog box rectangles so that right and bottom 
-    // values represent the width and height, and then offset the owner again 
-    // to discard space taken up by the dialog box. 
-
-    OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
-    OffsetRect(&rc, -rc.left, -rc.top);
-    OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
-
-    // The new position is the sum of half the remaining space and the owner's 
-    // original position. 
-
-    SetWindowPos(hDlg,
-        HWND_TOP,
-        rcOwner.left + (rc.right / 2),
-        rcOwner.top + (rc.bottom / 2),
-        0, 0,          // Ignores size arguments. 
-        SWP_NOSIZE);
-
-    
-
-}
-
 HINSTANCE StanDev::GetInstance() noexcept
 {
     return stanDevObj.hInst;
@@ -128,68 +132,206 @@ HINSTANCE StanDev::GetInstance() noexcept
 void StanDev::StanDevInterface()
 {
     // Radio Buttons
-    stanDevObj.hPopBtn = Widget::ButtonRadio(30, 20, 150, 30, "Population", m_hWnd, NULL);
-    stanDevObj.hSampBtn = Widget::ButtonRadio(30, 50, 150, 30, "Sample", m_hWnd, NULL);
+    hPopBtn = Widget::ButtonRadio(30, 20, 150, 30, "Population", m_hWnd, (HMENU)STANDEV_POP_RADIO);
+    hSampBtn = Widget::ButtonRadio(30, 50, 150, 30, "Sample", m_hWnd, (HMENU)STANDEV_SMPL_RADIO);
+    SendMessage(hPopBtn, BM_SETCHECK, BST_CHECKED, 0);   // Set initial state.
 
     // Labels
-    stanDevObj.hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
-    stanDevObj.hInputLabel = Widget::RLabel(60, 135, 150, 30, "Sum of Squares:", m_hWnd);
-    stanDevObj.hInputLabel = Widget::RLabel(60, 175, 150, 30, "Mean:", m_hWnd);
-    stanDevObj.hDevResultLabel = Widget::RLabel(60, 215, 150, 30, "Standard Deviation:", m_hWnd);
+    hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
+    hInputLabel = Widget::RLabel(60, 155, 150, 30, "Sum of Squares:", m_hWnd);
+    hInputLabel = Widget::RLabel(60, 195, 150, 30, "Mean:", m_hWnd);
+    hDevResultLabel = Widget::RLabel(60, 235, 150, 30, "Standard Deviation:", m_hWnd);
 
     // input/result Boxes.
-    stanDevObj.hStanDevInput = Widget::InputBox(70, 90, 230, 30, m_hWnd);      // Input.
+    hStanDevInput = Widget::InputBoxMulti(70, 90, 230, 45, m_hWnd);      // Input.
 
-    stanDevObj.hSumResult = Widget::ResultBox(220, 130, 80, 30, m_hWnd);        // Sum.
-    stanDevObj.hMeanResult = Widget::ResultBox(220, 170, 80, 30, m_hWnd);       // Mean
-    stanDevObj.hStanDevResult = Widget::ResultBox(220, 210, 80, 30, m_hWnd);    // Standard Deviation.
+    hSumResult = Widget::ResultBox(220, 150, 80, 30, m_hWnd);        // Sum.
+    hMeanResult = Widget::ResultBox(220, 190, 80, 30, m_hWnd);       // Mean
+    hStanDevResult = Widget::ResultBox(220, 230, 80, 30, m_hWnd);    // Standard Deviation.
 
     // Buttons.
-    stanDevObj.hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)VOLUME_CLEAR_BUTTON);
-    stanDevObj.hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
+    hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)STANDEV_CLEAR_BUTTON);
+    hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)STANDEV_CLOSE_BUTTON);
 
     // Calculate.
-    stanDevObj.hCalcBtn = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)STANDEV_CALCULATE);
+    hCalcBtn = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)STANDEV_CALCULATE);
 }
 
 void StanDev::StanDevWnd()
 {
-    if (StanDev::stanDevObj.sdWndCreated)
-        SetFocus(StanDev::stanDevObj.GetWinHandle());
+    if (sdWndCreated)
+        SetFocus(m_hWnd);
     else
     {
-        StanDev::stanDevObj.CreateWnd("Standard Deviation", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
+        CreateWnd("Standard Deviation", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
             0, 270, 270, 480, 350, GetParent(m_hWnd));
-        ShowWindow(StanDev::stanDevObj.GetWinHandle(), SW_SHOW);
-        StanDev::stanDevObj.sdWndCreated = 1;
+        ShowWindow(m_hWnd, SW_SHOW);
+        sdWndCreated = 1;
     }
 }
 
-void StanDev::CalculateDev(const double arr[], int sizeUsed, double& avg, double& dev)
+void StanDev::UserIn()
 {
     // Declare variables.
-    double next = 0.0,
-        avgSum = 0.0,
-        devSum = 0.0;
+    int index = 0;
+    int swVal;
+    double dblUserIn, dblDevResult = 0.0;
+    char charUserIn[100], charDevResult[100];
+    std::string strDevResult;
+    std::stringstream ss;    // Declare a string stream var.
 
-    int avgCount = 0,
-        devCount = 0;
+    GetWindowText(hStanDevInput, charUserIn, 100);	// Retrieve the volume text.
 
-    // Read all the numbers in the array, add them up and calculate the average.
-    for (int i = 0; i < sizeUsed; i++)
+    // Validate user input.
+    if (strcmp(charUserIn, "") == 0)
     {
-        avgSum += arr[i];
-        avgCount++;
-    }
-    avg = avgSum / avgCount;    // Calculate the average.
+        swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter values.",
+            NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
 
-    // Read all the numbers in the array to calculate the standard deviation.
-    for (int i = 0; i < sizeUsed; i++)
-    {
-        devSum += pow(arr[i] - avg, 2);
-        devCount++;
+        switch (swVal)
+        {
+        case IDCANCEL:
+            DestroyWindow(m_hWnd);
+            break;
+
+        case IDOK:
+            //return 0;
+            break;
+
+        }
     }
-    dev = sqrt(devSum / (devCount));    // Or for Sample (devCount - 1).
+
+    for (size_t i = 0; i < strlen(charUserIn); i++)
+    {
+        if (!isdigit(charUserIn[i]) && charUserIn[i] != '.')
+        {
+            swVal = MessageBoxEx(m_hWnd, "Input is not a valid number!\nPlease enter Input as a valid number."
+                "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+            switch (swVal)
+            {
+            case IDCANCEL:
+                DestroyWindow(m_hWnd);
+                break;
+
+            case IDOK:
+                //return 0;
+                break;
+
+            }
+        }
+    }
+
+    // Read the input.
+
+
+    // Convert  to double.
+    dblUserIn = strtod(charUserIn, NULL);
+
+    // Add to array.
+    for (int i = 0; i < arrSize; i++)
+    {
+        std::cin >> arr[i];
+    }
+    //if ((sizeUsed > 0) && (sizeUsed <= MAX_ARR_SIZE))
+    //{
+    //    for (int i = 1; i <= sizeUsed; i++)
+    //    {
+    //        cout << "Enter number " << i << ": ";
+    //        while (!(cin >> arr[i - 1]))
+    //        {
+
+    //            cout << "Error: Enter only valid integer values.\n"
+    //                << "Enter number " << i << ": ";
+    //            cin.clear();
+    //            cin.ignore(25, '\n');
+
+    //        }
+
+    //    }
+    //}
+
 }
+
+void StanDev::CalcMean()
+{
+    // Read all the numbers in the array, add them up and calculate the average.
+    for (int i = 0; i < arrSize; i++)
+    {
+        meanSum += arr[i];
+        count++;
+    }
+    mean = meanSum / count;    // Calculate the average.
+}
+
+void StanDev::CalcStanDevPop()
+{
+    // User input.
+    //UserIn();
+
+    // Calculate the mean.
+    //CalcMean();
+
+    //// Read all the numbers in the array to calculate the standard deviation (Population).
+    //for (int i = 0; i < arrSize; i++)
+    //{
+    //    devSum += pow(arr[i] - mean, 2);
+    //    //devCount++;
+    //}
+    //dev = sqrt(devSum / (count));    // Or for Sample (devCount - 1).
+
+
+    // Convert result to char* arr.
+    //sprintf_s(lengthText, "%f", lengthNum);
+
+    // test.
+    std::string strDevResult = "POP";
+    char charDevResult[100];
+    //strDevResult = ToString(dblDevResult); // Get the string.
+    strcpy_s(charDevResult, strDevResult.c_str());   // Convert to C-string
+
+    SetWindowTextA(hStanDevResult, charDevResult);	// Display the result.
+}
+
+void StanDev::CalcStanDevSmpl()
+{
+    // User input.
+    //UserIn();
+
+    // Calculate the mean.
+    //CalcMean();
+
+    //// Read all the numbers in the array to calculate the standard deviation (Sample).
+    //for (int i = 0; i < arrSize; i++)
+    //{
+    //    devSum += pow(arr[i] - mean, 2);
+    //    //devCount++;
+    //}
+    //dev = sqrt(devSum / (count - 1));
+
+    // test.
+    std::string strDevResult = "SMPL";
+    char charDevResult[100];
+    //strDevResult = ToString(dblDevResult); // Get the string.
+    strcpy_s(charDevResult, strDevResult.c_str());   // Convert to C-string
+
+    SetWindowTextA(hStanDevResult, charDevResult);	// Display the result.
+}
+
+std::string StanDev::ToString(double num)
+{
+    std::stringstream ss;    // Declare a string stream var.
+
+    // Set the decimal point.
+    ss.setf(std::ios::fixed);
+    ss.setf(std::ios::showpoint);
+    ss.precision(3);
+
+    ss << num;
+
+    return ss.str();
+}
+
+
 
 

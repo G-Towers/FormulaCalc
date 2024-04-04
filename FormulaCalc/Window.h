@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <sstream>
+#include <stdlib.h>
 #include "GTException.h"
 #include "Widget.h"
 #include "Resource.h"

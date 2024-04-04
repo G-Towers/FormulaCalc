@@ -11,6 +11,7 @@ namespace Widget
 	HWND LLabel(int posx, int posy, int width, int height, const char* text, HWND hWnd);
 	HWND GroupBox(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst);
 	HWND InputBox(int posx, int posy, int width, int height, HWND hWnd);
+	HWND InputBoxMulti(int posx, int posy, int width, int height, HWND hWnd);
 	HWND ComboBox(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst);
 	HWND Button(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);
 	HWND ButtonDef(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);

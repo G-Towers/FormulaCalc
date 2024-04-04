@@ -49,6 +49,16 @@ HWND Widget::InputBox(int posx, int posy, int width, int height, HWND hWnd)
 	return InptBx_hWnd;
 }
 
+HWND Widget::InputBoxMulti(int posx, int posy, int width, int height, HWND hWnd)
+{
+	HWND InptBx_hWnd = CreateWindowEx(
+		WS_EX_CLIENTEDGE, "Edit", NULL,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_MULTILINE,
+		posx, posy, width, height, hWnd, NULL, NULL, NULL);
+
+	return InptBx_hWnd;
+}
+
 HWND Widget::ComboBox(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst)
 {
 	HWND CmbBx_hWnd = CreateWindow(

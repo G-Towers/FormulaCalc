@@ -20,9 +20,6 @@ public:
 	static StanDev& InstStanDevWnd();
 	// Singleton to instantiate an object only once.
 
-	void InitDlg(HWND hWndOwner, HWND hDlg);
-	// Initializes a dialog box.
-
 	static HINSTANCE GetInstance() noexcept;
 	// Gets the handle to the instance.
 
@@ -32,8 +29,20 @@ public:
 	void StanDevWnd();
 	// Creates the Standard Deviation Window.
 
-	void CalculateDev(const double arr[], int sizeUsed, double& avg, double& dev);
-	// Calculates the standard deviation.
+	void UserIn();
+	// Input values from the user.
+
+	void CalcMean();
+	// Calculates the mean.
+
+	void CalcStanDevPop();
+	// Calculates the standard deviation for population.
+
+	void CalcStanDevSmpl();
+	// Calculates the standard deviation for sample size.
+
+	std::string ToString(double num);
+	// Convert to string.
 
 	static BOOL sdWndCreated;	// Flag for window created.
 
@@ -46,9 +55,12 @@ public:
 
 	// variables
 	int count;
+	int arrSize;
 	double dev;
 	double mean;
-	double sum;
+	double meanSum;
+	double devSum;
+	double* arr;
 
 	// Radio Buttons
 	HWND hPopBtn;

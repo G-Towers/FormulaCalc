@@ -24,6 +24,11 @@
 #define VOLUME_CALCULATE_PYRAMID_BUTTON		40016
 
 #define STANDEV_CALCULATE					40017
+#define STANDEV_POP_RADIO					40018
+#define STANDEV_SMPL_RADIO					40019
+#define STANDEV_CLEAR_BUTTON				40020
+#define STANDEV_CLOSE_BUTTON				40021
+
 
 // Next default values for new objects
 // 
