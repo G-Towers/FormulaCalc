@@ -178,7 +178,7 @@ void StanDev::UserIn()
     double dblUserIn, dblDevResult = 0.0;
     char charUserIn[100], charDevResult[100];
     std::string strDevResult;
-    std::stringstream ss;    // Declare a string stream var.
+    //std::istringstream iss;    // Declare a string stream var.
 
     GetWindowText(hStanDevInput, charUserIn, 100);	// Retrieve the volume text.
 
@@ -203,7 +203,7 @@ void StanDev::UserIn()
 
     for (size_t i = 0; i < strlen(charUserIn); i++)
     {
-        if (!isdigit(charUserIn[i]) && charUserIn[i] != '.')
+        if (!isdigit(charUserIn[i]) && charUserIn[i] != '.' && charUserIn[i] != ' ' && charUserIn[i] != ',')
         {
             swVal = MessageBoxEx(m_hWnd, "Input is not a valid number!\nPlease enter Input as a valid number."
                 "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -221,6 +221,11 @@ void StanDev::UserIn()
             }
         }
     }
+
+    // Create string stream from char array.
+    std::istringstream iss(charUserIn);
+    std::string token;
+    while (iss >> token)
 
     // Read the input.
 
@@ -267,7 +272,7 @@ void StanDev::CalcMean()
 void StanDev::CalcStanDevPop()
 {
     // User input.
-    //UserIn();
+    UserIn();
 
     // Calculate the mean.
     //CalcMean();
