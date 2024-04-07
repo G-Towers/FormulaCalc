@@ -10,13 +10,10 @@ StanDev::StanDev()
     hInst = GetModuleHandle(NULL);
 
     count = 0;
-    arrSize = 0;
     dev = 0.0;
     mean = 0.0;
     meanSum = 0.0;
     devSum = 0.0;
-    
-    arr = new double[arrSize];
 
     hPopBtn = nullptr;
     hSampBtn = nullptr;
@@ -138,16 +135,16 @@ void StanDev::StanDevInterface()
 
     // Labels
     hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
-    hInputLabel = Widget::RLabel(60, 155, 150, 30, "Sum of Squares:", m_hWnd);
-    hInputLabel = Widget::RLabel(60, 195, 150, 30, "Mean:", m_hWnd);
-    hDevResultLabel = Widget::RLabel(60, 235, 150, 30, "Standard Deviation:", m_hWnd);
+    hDevResultLabel = Widget::RLabel(60, 155, 150, 30, "Standard Deviation:", m_hWnd);
+    hMeanLabel = Widget::RLabel(60, 195, 150, 30, "Mean:", m_hWnd);
+    hSumLabel = Widget::RLabel(60, 235, 150, 30, "Sum of Squares:", m_hWnd);
 
     // input/result Boxes.
-    hStanDevInput = Widget::InputBoxMulti(70, 90, 230, 45, m_hWnd);      // Input.
+    hStanDevInput = Widget::InputBoxMulti(70, 90, 230, 45, m_hWnd);  // Input.
 
-    hSumResult = Widget::ResultBox(220, 150, 80, 30, m_hWnd);        // Sum.
+    hStanDevResult = Widget::ResultBox(220, 150, 80, 30, m_hWnd);    // Standard Deviation.
     hMeanResult = Widget::ResultBox(220, 190, 80, 30, m_hWnd);       // Mean
-    hStanDevResult = Widget::ResultBox(220, 230, 80, 30, m_hWnd);    // Standard Deviation.
+    hSumResult = Widget::ResultBox(220, 230, 80, 30, m_hWnd);        // Sum.
 
     // Buttons.
     hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)STANDEV_CLEAR_BUTTON);
@@ -175,15 +172,15 @@ void StanDev::UserIn()
     // Declare variables.
     int index = 0;
     int swVal;
-    double dblUserIn, dblDevResult = 0.0;
-    char charUserIn[100], charDevResult[100];
+    double dblDevResult = 0.0;
+    //char charUserIn[100];
     std::string strDevResult;
     //std::istringstream iss;    // Declare a string stream var.
 
-    GetWindowText(hStanDevInput, charUserIn, 100);	// Retrieve the volume text.
+    GetWindowText(hStanDevInput, charArr, 256);	// Retrieve the volume text.
 
     // Validate user input.
-    if (strcmp(charUserIn, "") == 0)
+    if (strcmp(charArr, "") == 0)
     {
         swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter values.",
             NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -201,9 +198,10 @@ void StanDev::UserIn()
         }
     }
 
-    for (size_t i = 0; i < strlen(charUserIn); i++)
+    for (size_t i = 0; i < strlen(charArr); i++)
     {
-        if (!isdigit(charUserIn[i]) && charUserIn[i] != '.' && charUserIn[i] != ' ' && charUserIn[i] != ',')
+        if (!isdigit(charArr[i]) && charArr[i] != '.' && charArr[i] != ' ' &&
+            charArr[i] != ',' && charArr[i] != '\n')
         {
             swVal = MessageBoxEx(m_hWnd, "Input is not a valid number!\nPlease enter Input as a valid number."
                 "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -222,48 +220,44 @@ void StanDev::UserIn()
         }
     }
 
-    // Create string stream from char array.
-    std::istringstream iss(charUserIn);
-    std::string token;
-    while (iss >> token)
-
-    // Read the input.
-
-
-    // Convert  to double.
-    dblUserIn = strtod(charUserIn, NULL);
-
-    // Add to array.
-    for (int i = 0; i < arrSize; i++)
-    {
-        std::cin >> arr[i];
-    }
-    //if ((sizeUsed > 0) && (sizeUsed <= MAX_ARR_SIZE))
-    //{
-    //    for (int i = 1; i <= sizeUsed; i++)
-    //    {
-    //        cout << "Enter number " << i << ": ";
-    //        while (!(cin >> arr[i - 1]))
-    //        {
-
-    //            cout << "Error: Enter only valid integer values.\n"
-    //                << "Enter number " << i << ": ";
-    //            cin.clear();
-    //            cin.ignore(25, '\n');
-
-    //        }
-
-    //    }
-    //}
-
 }
 
-void StanDev::CalcMean()
+std::vector<std::string> StanDev::split(const char* input, char delimiter)
+{
+    std::vector<std::string> result;    // Vector of strings.
+    std::string token;
+    for (const char* c = input; *c != '\0'; ++c) // Use pointer to iterate through the char array.
+    {
+        if (*c == delimiter) {
+            result.push_back(token);    // Add to the vector.
+            token.clear();  // Empty the string.
+        }
+        else
+        {
+            if (*c != ' ')  // Ignore spaces.
+                token += *c;    // Add to the string.
+        }
+
+    }
+    if (!token.empty()) // If string is not empty.
+    {
+        result.push_back(token);    // Add to the vector.
+    }
+
+    return result;
+}
+
+double StanDev::stringToDouble(const std::string& str)
+{
+    return std::stod(str);
+}
+
+void StanDev::CalcMean(std::vector<double>& vec)
 {
     // Read all the numbers in the array, add them up and calculate the average.
-    for (int i = 0; i < arrSize; i++)
+    for (int i = 0; i < vec.size(); i++)
     {
-        meanSum += arr[i];
+        meanSum += vec[i];
         count++;
     }
     mean = meanSum / count;    // Calculate the average.
@@ -271,56 +265,102 @@ void StanDev::CalcMean()
 
 void StanDev::CalcStanDevPop()
 {
+    char charDev[256];
+    char charMean[256];
+    char charSum[256];
+    std::string strDev = "";
+    std::string strMean = "";
+    std::string strSum = "";
+
     // User input.
     UserIn();
 
+    // Split using custom delimiter
+    std::vector<std::string> strVec = split(charArr, ',');
+
+    // Create a vector of doubles with the same size as the string vector.
+    std::vector<double> dblVec(strVec.size());
+
+    // Split using custom delimiter
+    strVec = split(charArr, ',');
+
+    // Convert each string to a double and store it in the double vector using lambda.
+    std::transform(strVec.begin(), strVec.end(), dblVec.begin(),
+        [](const std::string& str) { return std::stod(str); });
+
     // Calculate the mean.
-    //CalcMean();
+    CalcMean(dblVec);
 
-    //// Read all the numbers in the array to calculate the standard deviation (Population).
-    //for (int i = 0; i < arrSize; i++)
-    //{
-    //    devSum += pow(arr[i] - mean, 2);
-    //    //devCount++;
-    //}
-    //dev = sqrt(devSum / (count));    // Or for Sample (devCount - 1).
+    // Read all the numbers in the array to calculate the standard deviation (Population).
+    for (int i = 0; i < dblVec.size(); i++)
+    {
+        devSum += pow(dblVec[i] - mean, 2);
+        //count++;
+    }
+    dev = sqrt(devSum / count);    // Or for Sample (devCount - 1).
 
+    strDev = ToString(dev); // Get the string.  
+    strMean = ToString(mean); // Get the Mean.
+    strSum = ToString(devSum); // Get the sum of squares.
 
-    // Convert result to char* arr.
-    //sprintf_s(lengthText, "%f", lengthNum);
+    strcpy_s(charDev, strDev.c_str());   // Convert to C-string
+    strcpy_s(charMean, strMean.c_str());
+    strcpy_s(charSum, strSum.c_str());
 
-    // test.
-    std::string strDevResult = "POP";
-    char charDevResult[100];
-    //strDevResult = ToString(dblDevResult); // Get the string.
-    strcpy_s(charDevResult, strDevResult.c_str());   // Convert to C-string
-
-    SetWindowTextA(hStanDevResult, charDevResult);	// Display the result.
+    SetWindowText(hSumResult, charSum);
+    SetWindowText(hMeanResult, charMean);
+    SetWindowText(hStanDevResult, charDev);	// Display the result.
+    
+    
 }
 
 void StanDev::CalcStanDevSmpl()
 {
+    char charDev[256];
+    char charMean[256];
+    char charSum[256];
+    std::string strDev = "";
+    std::string strMean = "";
+    std::string strSum = "";
+
     // User input.
-    //UserIn();
+    UserIn();
+
+    // Split using custom delimiter
+    std::vector<std::string> strVec = split(charArr, ',');
+
+    // Create a vector of doubles with the same size as the string vector.
+    std::vector<double> dblVec(strVec.size());
+
+    // Split using custom delimiter
+    strVec = split(charArr, ',');
+
+    // Convert each string to a double and store it in the double vector using lambda.
+    std::transform(strVec.begin(), strVec.end(), dblVec.begin(),
+        [](const std::string& str) { return std::stod(str); });
 
     // Calculate the mean.
-    //CalcMean();
+    CalcMean(dblVec);
 
-    //// Read all the numbers in the array to calculate the standard deviation (Sample).
-    //for (int i = 0; i < arrSize; i++)
-    //{
-    //    devSum += pow(arr[i] - mean, 2);
-    //    //devCount++;
-    //}
-    //dev = sqrt(devSum / (count - 1));
+    // Read all the numbers in the array to calculate the standard deviation (Population).
+    for (int i = 0; i < dblVec.size(); i++)
+    {
+        devSum += pow(dblVec[i] - mean, 2);
+        //count++;
+    }
+    dev = sqrt(devSum / (count - 1));    // Or for Sample (devCount - 1).
 
-    // test.
-    std::string strDevResult = "SMPL";
-    char charDevResult[100];
-    //strDevResult = ToString(dblDevResult); // Get the string.
-    strcpy_s(charDevResult, strDevResult.c_str());   // Convert to C-string
+    strDev = ToString(dev); // Get the string.  
+    strMean = ToString(mean); // Get the Mean.
+    strSum = ToString(devSum); // Get the sum of squares.
 
-    SetWindowTextA(hStanDevResult, charDevResult);	// Display the result.
+    strcpy_s(charDev, strDev.c_str());   // Convert to C-string
+    strcpy_s(charMean, strMean.c_str());
+    strcpy_s(charSum, strSum.c_str());
+
+    SetWindowText(hSumResult, charSum);
+    SetWindowText(hMeanResult, charMean);
+    SetWindowText(hStanDevResult, charDev);	// Display the result.
 }
 
 std::string StanDev::ToString(double num)

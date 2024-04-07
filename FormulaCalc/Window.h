@@ -4,6 +4,9 @@
 
 #include <Windows.h>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 #include <sstream>
 #include <stdlib.h>
 #include "GTException.h"

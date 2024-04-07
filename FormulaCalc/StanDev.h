@@ -32,7 +32,13 @@ public:
 	void UserIn();
 	// Input values from the user.
 
-	void CalcMean();
+	std::vector<std::string> split(const char* input, char delimiter);
+	// Custom function to split char array into a vector of strings.
+
+	double stringToDouble(const std::string& str);
+	// Function to convert string to double.
+
+	void CalcMean(std::vector<double>& vec);
 	// Calculates the mean.
 
 	void CalcStanDevPop();
@@ -55,12 +61,11 @@ public:
 
 	// variables
 	int count;
-	int arrSize;
 	double dev;
 	double mean;
 	double meanSum;
 	double devSum;
-	double* arr;
+	char charArr[256];
 
 	// Radio Buttons
 	HWND hPopBtn;
