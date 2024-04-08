@@ -8,11 +8,37 @@ HWND Widget::RLabel(int posx, int posy, int width, int height, const char* text,
 	HWND Rlbl_hWnd = CreateWindowEx(WS_EX_RIGHT, "static", text,
 		WS_VISIBLE | WS_CHILD,
 		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
-	HFONT hfVol = CreateFont(/*size=*/-14, 0, 0, 0, FW_NORMAL, 0, 0, 0,
-		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "MS Sans Serif");
+	HFONT hfVol = CreateFont( 16,			// Height
+							  5,			// Width
+							  0,			// Escapement
+							  0,			// Orientation
+							  FW_NORMAL,	// Weight
+							  0,			// Italic
+							  0,			// Underline
+							  0,			// Strikeout
+							  ANSI_CHARSET,			// Character set.
+							  OUT_DEFAULT_PRECIS,	// Output precision.
+							  CLIP_DEFAULT_PRECIS,	// Clip precision
+							  DEFAULT_QUALITY,		// Quality
+							  DEFAULT_PITCH,		// Pitch and family
+							  "MS Sans Serif"		// Font
+							  );
+
 	SendMessage(Rlbl_hWnd, WM_SETFONT, (WPARAM)hfVol, 0);
 
 	return Rlbl_hWnd;
+}
+
+HWND Widget::RLabelBold(int posx, int posy, int width, int height, const char* text, HWND hWnd)
+{
+	HWND RlblBld_hWnd = CreateWindowEx(WS_EX_RIGHT, "static", text,
+		WS_VISIBLE | WS_CHILD,
+		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
+	HFONT hfVol = CreateFont(16, 5, 0, 0, FW_BOLD, 0, 0, 0,
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "MS Sans Serif");
+	SendMessage(RlblBld_hWnd, WM_SETFONT, (WPARAM)hfVol, 0);
+
+	return RlblBld_hWnd;
 }
 
 HWND Widget::LLabel(int posx, int posy, int width, int height, const char* text, HWND hWnd)
@@ -20,7 +46,7 @@ HWND Widget::LLabel(int posx, int posy, int width, int height, const char* text,
 	HWND Llbl_hWnd = CreateWindowEx(WS_EX_LEFT, "static", text,
 		WS_VISIBLE | WS_CHILD,
 		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
-	HFONT hfVol = CreateFont(/*size=*/-14, 0, 0, 0, FW_NORMAL, 0, 0, 0,
+	HFONT hfVol = CreateFont(16, 5, 0, 0, FW_NORMAL, 0, 0, 0,
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "MS Sans Serif");
 	SendMessage(Llbl_hWnd, WM_SETFONT, (WPARAM)hfVol, 0);
 

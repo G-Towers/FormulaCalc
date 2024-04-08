@@ -135,7 +135,7 @@ void StanDev::StanDevInterface()
 
     // Labels
     hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
-    hDevResultLabel = Widget::RLabel(60, 155, 150, 30, "Standard Deviation:", m_hWnd);
+    hDevResultLabel = Widget::RLabelBold(60, 155, 150, 30, "Standard Deviation:", m_hWnd);
     hMeanLabel = Widget::RLabel(60, 195, 150, 30, "Mean:", m_hWnd);
     hSumLabel = Widget::RLabel(60, 235, 150, 30, "Sum of Squares:", m_hWnd);
 
