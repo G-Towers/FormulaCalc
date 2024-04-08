@@ -73,7 +73,7 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case STANDEV_CLEAR_BUTTON:
-
+            ClearStanDevText();
             break;
         case STANDEV_CLOSE_BUTTON:
             DestroyWindow(m_hWnd);
@@ -165,6 +165,30 @@ void StanDev::StanDevWnd()
         ShowWindow(m_hWnd, SW_SHOW);
         sdWndCreated = 1;
     }
+}
+
+void StanDev::ClearStanDevText()
+{
+    const char* emptyText = "";
+
+    SetWindowText(hStanDevInput, emptyText);
+    SetWindowText(hStanDevResult, emptyText);
+    SetWindowText(hMeanResult, emptyText);
+    SetWindowText(hSumResult, emptyText);
+
+    ReInit();
+
+    SetFocus(hStanDevInput);
+
+}
+
+void StanDev::ReInit()
+{
+    count = 0;
+    dev = 0.0;
+    mean = 0.0;
+    meanSum = 0.0;
+    devSum = 0.0;
 }
 
 void StanDev::UserIn()

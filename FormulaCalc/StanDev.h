@@ -29,6 +29,12 @@ public:
 	void StanDevWnd();
 	// Creates the Standard Deviation Window.
 
+	void ClearStanDevText();
+	// Clears the window (removes the interface).
+
+	void ReInit();
+	// Reinitialize values (Reset to 0).
+
 	void UserIn();
 	// Input values from the user.
 
@@ -65,7 +71,7 @@ public:
 	double mean;
 	double meanSum;
 	double devSum;
-	char charArr[256];
+	char charArr[256] = {};
 
 	// Radio Buttons
 	HWND hPopBtn;
