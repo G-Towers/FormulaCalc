@@ -35,7 +35,7 @@ public:
 	void ReInit();
 	// Reinitialize values (Reset to 0).
 
-	void UserIn();
+	int UserIn();
 	// Input values from the user.
 
 	std::vector<std::string> split(const char* input, char delimiter);
