@@ -65,9 +65,9 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 BOOL sdSmplChecked = SendMessage(GetDlgItem(m_hWnd, STANDEV_SMPL_RADIO),
                     BM_GETCHECK, 0, 0) == BST_CHECKED;
                 if (sdPopChecked)
-                    CalcStanDevPop();
+                    CalcStanDev(sdPopChecked);
                 else if (sdSmplChecked)
-                    CalcStanDevSmpl();
+                    CalcStanDev(sdPopChecked);
 
             }
             break;
@@ -269,11 +269,15 @@ std::vector<std::string> StanDev::split(const char* input, char delimiter)
     for (auto& str : result) 
     {
         str.erase(std::remove(str.begin(), str.end(), ','), str.end());
+        //str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
     }
 
     token.clear();  // Clear the token.
 
-    //// Remove trailing commas.
+    //
+    result.erase(std::remove(result.begin(), result.end(), ""), result.end());
+
+    //// Remove trailing commas from the vector.
     //for (std::string& str : result)
     //{
     //    if (!str.empty() && str.back() == ',') 
@@ -288,10 +292,16 @@ std::vector<std::string> StanDev::split(const char* input, char delimiter)
         combined += str;
         combined += ", ";
     }
-   const char* charIn = combined.c_str();
-   result = {}; // Reset result.
+    // Remove trailing comma.
+    combined = combined.substr(0, combined.find_last_of(","));
 
-   SetWindowText(hStanDevInput, charIn);
+    // Removes all commas in a string.
+    //combined.erase(std::remove(combined.begin(), combined.end(), ','), combined.end());   
+     
+    const char* charIn = combined.c_str();   // convert to char arr.
+    result = {}; // Reset result.
+
+    SetWindowText(hStanDevInput, charIn);
 
     for (const char* c = charIn; *c != '\0'; ++c) // Use pointer to iterate through the char array.
     {
@@ -331,7 +341,7 @@ void StanDev::CalcMean(std::vector<double>& vec)
     mean = meanSum / count;    // Calculate the average.
 }
 
-void StanDev::CalcStanDevPop()
+void StanDev::CalcStanDev(BOOL& eqOpt)
 {
     char charDev[256];
     char charMean[256];
@@ -339,6 +349,10 @@ void StanDev::CalcStanDevPop()
     std::string strDev = "";
     std::string strMean = "";
     std::string strSum = "";
+
+    //// Lambdas.
+    //auto eqModPop = [this]() {dev = sqrt(devSum / count); };
+    //auto eqModSmpl = [this]() {dev = sqrt(devSum / (count - 1)); };
 
     // User input.
     int inOk = UserIn();
@@ -358,6 +372,8 @@ void StanDev::CalcStanDevPop()
         std::transform(strVec.begin(), strVec.end(), dblVec.begin(),
             [](const std::string& str) { return std::stod(str); });
 
+        ReInit();   // Re-Initialize.
+
         // Calculate the mean.
         CalcMean(dblVec);
 
@@ -367,7 +383,12 @@ void StanDev::CalcStanDevPop()
             devSum += pow(dblVec[i] - mean, 2);
             //count++;
         }
-        dev = sqrt(devSum / count);    // Or for Sample (devCount - 1).
+
+        // Determine which calculation to apply.
+        if (eqOpt)
+            dev = sqrt(devSum / count);
+        else
+            dev = sqrt(devSum / (count - 1));
 
         strDev = ToString(dev); // Get the string.  
         strMean = ToString(mean); // Get the Mean.
@@ -381,57 +402,7 @@ void StanDev::CalcStanDevPop()
         SetWindowText(hMeanResult, charMean);
         SetWindowText(hStanDevResult, charDev);	// Display the result.
     }
-    
-    
-}
 
-void StanDev::CalcStanDevSmpl()
-{
-    char charDev[256];
-    char charMean[256];
-    char charSum[256];
-    std::string strDev = "";
-    std::string strMean = "";
-    std::string strSum = "";
-
-    // User input.
-    UserIn();
-
-    // Split using custom delimiter
-    std::vector<std::string> strVec = split(charArr, ',');
-
-    // Create a vector of doubles with the same size as the string vector.
-    std::vector<double> dblVec(strVec.size());
-
-    // Split using custom delimiter
-    strVec = split(charArr, ',');
-
-    // Convert each string to a double and store it in the double vector using lambda.
-    std::transform(strVec.begin(), strVec.end(), dblVec.begin(),
-        [](const std::string& str) { return std::stod(str); });
-
-    // Calculate the mean.
-    CalcMean(dblVec);
-
-    // Read all the numbers in the array to calculate the standard deviation (Population).
-    for (int i = 0; i < dblVec.size(); i++)
-    {
-        devSum += pow(dblVec[i] - mean, 2);
-        //count++;
-    }
-    dev = sqrt(devSum / (count - 1));    // Or for Sample (devCount - 1).
-
-    strDev = ToString(dev); // Get the string.  
-    strMean = ToString(mean); // Get the Mean.
-    strSum = ToString(devSum); // Get the sum of squares.
-
-    strcpy_s(charDev, strDev.c_str());   // Convert to C-string
-    strcpy_s(charMean, strMean.c_str());
-    strcpy_s(charSum, strSum.c_str());
-
-    SetWindowText(hSumResult, charSum);
-    SetWindowText(hMeanResult, charMean);
-    SetWindowText(hStanDevResult, charDev);	// Display the result.
 }
 
 std::string StanDev::ToString(double num)

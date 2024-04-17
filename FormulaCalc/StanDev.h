@@ -47,11 +47,9 @@ public:
 	void CalcMean(std::vector<double>& vec);
 	// Calculates the mean.
 
-	void CalcStanDevPop();
-	// Calculates the standard deviation for population.
-
-	void CalcStanDevSmpl();
-	// Calculates the standard deviation for sample size.
+	void CalcStanDev(BOOL& eqOpt);
+	// Calculates the standard deviation for population and sample size.
+	// Uses BOOL reference parameter to distinguish between the two calculations.
 
 	std::string ToString(double num);
 	// Convert to string.
