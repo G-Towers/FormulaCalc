@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "VolWnd.h"
 #include "StanDev.h"
+#include "QuadForm.h"
 #include "WinMsgMap.h"
 
 BOOL VolWnd::volWndCreated = 0;
@@ -86,6 +87,10 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case ID_STATISTICS_STANDARDDEVIATION:
 			StanDev::stanDevObj.StanDevWnd();
+			break;
+
+		case ID_ALGEBRA_QUADRATICFORMULA:
+			QuadForm::quadFormObj.QuadFormWnd();
 			break;
 
 		case ID_FILE_EXIT:

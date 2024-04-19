@@ -77,7 +77,7 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         case STANDEV_CLOSE_BUTTON:
             DestroyWindow(m_hWnd);
-            UnregisterClass("VolWndClass", GetModuleHandle(NULL));
+            UnregisterClass("StanDevClass", GetModuleHandle(NULL));
             sdWndCreated = 0;
             return 0;
             //break;

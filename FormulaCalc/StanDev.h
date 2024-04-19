@@ -55,13 +55,13 @@ public:
 	// Convert to string.
 
 	static BOOL sdWndCreated;	// Flag for window created.
+	static StanDev stanDevObj;
 
-public:
+private:
 	
 	HINSTANCE hInst;
-
-	static StanDev stanDevObj;
-	static StanDev* inst;	// To use with InstVolWnd().
+	
+	static StanDev* inst;	// To use with InstStanDevWnd().
 
 	// variables
 	int count;
