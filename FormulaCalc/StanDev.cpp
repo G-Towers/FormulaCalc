@@ -76,9 +76,9 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             ClearStanDevText();
             break;
         case STANDEV_CLOSE_BUTTON:
-            DestroyWindow(m_hWnd);
-            UnregisterClass("StanDevClass", GetModuleHandle(NULL));
             sdWndCreated = 0;
+            UnregisterClass("StanDevClass", hInst);
+            DestroyWindow(m_hWnd);
             return 0;
             //break;
          }
@@ -91,9 +91,10 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         SetFocus(stanDevObj.hStanDevInput);
         break;
     case WM_DESTROY:
-        DestroyWindow(m_hWnd);
-        UnregisterClass("VolWndClass", GetModuleHandle(NULL));
         sdWndCreated = 0;
+        UnregisterClass("StanDevClass", hInst);
+        DestroyWindow(m_hWnd);
+        
         //PostQuitMessage(0);
         return 0;
     case WM_PAINT:
