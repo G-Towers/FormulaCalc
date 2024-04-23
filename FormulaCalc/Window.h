@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdlib.h>
+#include <cmath>
 #include "GTException.h"
 #include "Widget.h"
 #include "Resource.h"

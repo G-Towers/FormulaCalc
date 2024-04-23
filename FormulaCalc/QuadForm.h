@@ -23,6 +23,23 @@ public:
 	void QuadFormInterface();
 	// The Quadratic Formula Window interface.
 
+	void ClearQuadFormText();
+	// Clears the text boxes.
+
+	void ReInit();
+	// Reinitialize values (Reset to 0).
+
+	int UserIn();
+	// User input and validation.
+
+	double StringToDouble(const std::string& str);
+	// Function to convert string to double.
+
+	std::string ToString(double num);
+	// Convert to string.
+
+	void CalcQuadForm();
+	// Calculates the quadratic formula.
 
 	static BOOL qfWndCreated;	// Flag for window created.
 	static QuadForm quadFormObj;
@@ -32,15 +49,39 @@ private:
 
 	static QuadForm* inst;	// To use with InstStanDevWnd().
 
+	// Variables.
+	double dblA;
+	double dblB;
+	double dblC;
+	double dblResultPlus;
+	double dblResultMinus;
+
+	char charA[256] = {};
+	char charB[256] = {};
+	char charC[256] = {};
+	char charResultPlus[256] = {};
+	char charResultMinus[256] = {};
+
 	// Labels
 	HWND hStanFormEq;
-	HWND hA;
-	HWND hB;
-	HWND hC;
+	HWND hALbl;
+	HWND hBLbl;
+	HWND hCLbl;
+	HWND hResultLblPlus;
+	HWND hResultLblMinus;
 
-	// Input Boxes
+	// Input Boxes.
 	HWND hAIn;
 	HWND hBIn;
 	HWND hCIn;
+
+	// Result Boxes.
+	HWND hQuadFormResultPlus;
+	HWND hQuadFormResultMinus;
+
+	// Buttons.
+	HWND hClearBtn;
+	HWND hCloseBtn;
+	HWND hCalcBtn;
 
 };

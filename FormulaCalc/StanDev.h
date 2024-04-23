@@ -30,13 +30,13 @@ public:
 	// Creates the Standard Deviation Window.
 
 	void ClearStanDevText();
-	// Clears the window (removes the interface).
+	// Clears the text boxes.
 
 	void ReInit();
 	// Reinitialize values (Reset to 0).
 
 	int UserIn();
-	// Input values from the user.
+	// User input and validation.
 
 	std::vector<std::string> split(const char* input, char delimiter);
 	// Custom function to split char array into a vector of strings.

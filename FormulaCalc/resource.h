@@ -29,6 +29,9 @@
 #define STANDEV_SMPL_RADIO              40019
 #define STANDEV_CLEAR_BUTTON            40020
 #define STANDEV_CLOSE_BUTTON            40021
+#define QUADFORM_CLOSE_BUTTON			40022
+#define QUADFORM_CLEAR_BUTTON			40023
+#define QUADFORM_CALC_BUTTON			40024
 
 // Next default values for new objects
 // 
