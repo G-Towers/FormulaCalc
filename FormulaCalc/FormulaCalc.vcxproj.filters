@@ -39,6 +39,9 @@
     <ClCompile Include="QuadForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FinLoan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VolWnd.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="QuadForm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FinLoan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

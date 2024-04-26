@@ -358,7 +358,7 @@ void StanDev::CalcStanDev(BOOL& eqOpt)
     // User input.
     int inOk = UserIn();
 
-    if (inOk)
+    if (inOk)   // Process only if input is valid.
     {
         // Split using custom delimiter
         std::vector<std::string> strVec = split(charArr, ',');

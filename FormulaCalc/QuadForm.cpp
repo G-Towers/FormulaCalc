@@ -13,6 +13,7 @@ QuadForm::QuadForm()
     dblA = 0.0;
     dblB = 0.0;
     dblC = 0.0;
+    dblDiscrim = 0.0;
     dblResultPlus = 0.0;
     dblResultMinus = 0.0;
 
@@ -67,14 +68,19 @@ LRESULT QuadForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         QuadFormInterface();
         break;
     case WM_SETFOCUS:
-        SetFocus(m_hWnd);
+        SetFocus(hAIn);
         break;
+    //case WM_KEYDOWN:
+    //    if (IsDialogMessage(m_hWnd, &uMsg)) // call IsDialogMessage with the window handle and the message
+    //    {
+    //        return 0; // the message has been processed by IsDialogMessage
+    //    }
+    //    break;
     case WM_DESTROY:
         qfWndCreated = 0;
         UnregisterClass("QuadFormClass", hInst);
         DestroyWindow(m_hWnd);
         
-        //PostQuitMessage(0);
         return 0;
     case WM_PAINT:
     {
@@ -112,8 +118,8 @@ void QuadForm::QuadFormInterface()
     hALbl = Widget::RLabel(45, 85, 150, 30, "a = ", m_hWnd);
     hBLbl = Widget::RLabel(45, 125, 150, 30, "b = ", m_hWnd);
     hCLbl = Widget::RLabel(45, 165, 150, 30, "c = ", m_hWnd);
-    hResultLblPlus = Widget::RLabel(45, 205, 150, 30, "Result:   x = ", m_hWnd);
-    hResultLblMinus = Widget::RLabel(45, 245, 150, 30, "Result:  -x = ", m_hWnd);
+    hResultLblPlus = Widget::RLabel(15, 205, 150, 30, "Result:   x = ", m_hWnd);
+    hResultLblMinus = Widget::RLabel(15, 245, 150, 30, "Result:  -x = ", m_hWnd);
 
     // Input Boxes.
     hAIn = Widget::InputBox(200, 80, 80, 30, m_hWnd);       // Input box A.
@@ -121,15 +127,15 @@ void QuadForm::QuadFormInterface()
     hCIn = Widget::InputBox(200, 160, 80, 30, m_hWnd);      // Input box C.
 
     // Result boxes
-    hQuadFormResultPlus = Widget::ResultBox(200, 200, 80, 30, m_hWnd);
-    hQuadFormResultMinus = Widget::ResultBox(200, 240, 80, 30, m_hWnd);
-
-    // Buttons.
-    hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)QUADFORM_CLOSE_BUTTON);
-    hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)QUADFORM_CLEAR_BUTTON);
+    hQuadFormResultPlus = Widget::ResultBox(170, 200, 110, 30, m_hWnd);
+    hQuadFormResultMinus = Widget::ResultBox(170, 240, 110, 30, m_hWnd);
 
     // Calculate.
     hCalcBtn = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)QUADFORM_CALC_BUTTON);
+
+    // Buttons.
+    hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)QUADFORM_CLEAR_BUTTON);
+    hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)QUADFORM_CLOSE_BUTTON);
 
 }
 
@@ -189,7 +195,7 @@ int QuadForm::UserIn()
 
     for (size_t i = 0; i < strlen(charA); i++)
     {
-        if (!isdigit(charA[i]) && charA[i] != '.')
+        if (!isdigit(charA[i]) && charA[i] != '.' && charA[i] != '-')
         {
             swVal = MessageBoxEx(m_hWnd, "a: is not a valid number!\nPlease enter a: as a valid number."
                 "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -209,7 +215,7 @@ int QuadForm::UserIn()
 
     for (size_t i = 0; i < strlen(charB); i++)
     {
-        if (!isdigit(charB[i]) && charB[i] != '.')
+        if (!isdigit(charB[i]) && charB[i] != '.' && charB[i] != '-')
         {
             swVal = MessageBoxEx(m_hWnd, "b: is not a valid number!\nPlease enter b: as a valid number."
                 "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -229,7 +235,7 @@ int QuadForm::UserIn()
 
     for (size_t i = 0; i < strlen(charC); i++)
     {
-        if (!isdigit(charC[i]) && charC[i] != '.')
+        if (!isdigit(charC[i]) && charC[i] != '.' && charC[i] != '-')
         {
             swVal = MessageBoxEx(m_hWnd, "c: is not a valid number!\nPlease enter c: as a valid number."
                 "\nSee -- Help \\ Info-- for more information.", NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -271,30 +277,69 @@ std::string QuadForm::ToString(double num)
 
 void QuadForm::CalcQuadForm()
 {
-    UserIn();
+    int inOk = UserIn();
 
-    // Convert to double.
-    dblA = StringToDouble(charA);
-    dblB = StringToDouble(charB);
-    dblC = StringToDouble(charC);
+    if (inOk)   // Process only if input is valid.
+    {
+        // Convert to double.
+        dblA = StringToDouble(charA);
+        dblB = StringToDouble(charB);
+        dblC = StringToDouble(charC);
 
-    // Calculate quadratic formula.
-    dblResultPlus = ( -(dblB) + sqrt(pow(dblB, 2) - 4 * dblA * dblC) )
-        / (2 * dblA);
+        // Calculate the discriminant.
+        dblDiscrim = dblB * dblB - 4 * dblA * dblC;
 
-    dblResultMinus = ( -(dblB) - sqrt(pow(dblB, 2) - 4 * dblA * dblC) )
-        / (2 * dblA);
+        if (dblDiscrim == 0)    // One real root.
+        {
+            // Calculate.
+            dblResultPlus = (-(dblB))
+                / (2 * dblA);
+        }
 
-    // Get strings.
-    std::string strResultPlus = ToString(dblResultPlus);
-    std::string strResultMinus = ToString(dblResultMinus);
+        else if (dblDiscrim > 0)    // Two real roots.
+        {
+            // Calculate quadratic formula.
+            dblResultPlus = (-(dblB)+sqrt(dblDiscrim))
+                / (2 * dblA);
 
-    // Convert to c-strings.
-    strcpy_s(charResultPlus, strResultPlus.c_str());
-    strcpy_s(charResultMinus, strResultMinus.c_str());
+            dblResultMinus = (-(dblB)-sqrt(dblDiscrim))
+                / (2 * dblA);
 
-    // Display the results.
-    SetWindowText(hQuadFormResultPlus, charResultPlus);
-    SetWindowText(hQuadFormResultMinus, charResultMinus);
+            // Get strings.
+            std::string strResultPlus = ToString(dblResultPlus);
+            std::string strResultMinus = ToString(dblResultMinus);
+
+            // Convert to c-strings.
+            strcpy_s(charResultPlus, strResultPlus.c_str());
+            strcpy_s(charResultMinus, strResultMinus.c_str());
+
+            // Display the results.
+            SetWindowText(hQuadFormResultPlus, charResultPlus);
+            SetWindowText(hQuadFormResultMinus, charResultMinus);
+
+        }
+
+        else    // Two complex roots.
+        {
+            // Complex roots.
+            double realPt = -dblB / (2 * dblA);
+            double imagPt = sqrt(-dblDiscrim) / (2 * dblA);
+
+            // Get strings.
+            std::string strResultPlus = ToString(realPt) + " + " + ToString(imagPt) + " i";
+            std::string strResultMinus = ToString(realPt) + " - " + ToString(imagPt) + " i";
+
+            // Convert to c-strings.
+            strcpy_s(charResultPlus, strResultPlus.c_str());
+            strcpy_s(charResultMinus, strResultMinus.c_str());
+
+            // Display the results.
+            SetWindowText(hQuadFormResultPlus, charResultPlus);
+            SetWindowText(hQuadFormResultMinus, charResultMinus);
+
+        }
+
+
+    }
 
 }

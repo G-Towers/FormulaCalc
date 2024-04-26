@@ -47,12 +47,13 @@ public:
 private:
 	HINSTANCE hInst;
 
-	static QuadForm* inst;	// To use with InstStanDevWnd().
+	static QuadForm* inst;	// To use with InstQuadFormWnd().
 
 	// Variables.
 	double dblA;
 	double dblB;
 	double dblC;
+	double dblDiscrim;
 	double dblResultPlus;
 	double dblResultMinus;
 

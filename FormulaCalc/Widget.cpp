@@ -8,7 +8,7 @@ HWND Widget::RLabel(int posx, int posy, int width, int height, const char* text,
 	HWND Rlbl_hWnd = CreateWindowEx(WS_EX_RIGHT, "static", text,
 		WS_VISIBLE | WS_CHILD,
 		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
-	HFONT hfVol = CreateFont( 16,			// Height
+	HFONT hfLabel = CreateFont( 16,			// Height
 							  5,			// Width
 							  0,			// Escapement
 							  0,			// Orientation
@@ -24,7 +24,7 @@ HWND Widget::RLabel(int posx, int posy, int width, int height, const char* text,
 							  "MS Sans Serif"		// Font
 							  );
 
-	SendMessage(Rlbl_hWnd, WM_SETFONT, (WPARAM)hfVol, 0);
+	SendMessage(Rlbl_hWnd, WM_SETFONT, (WPARAM)hfLabel, 0);
 
 	return Rlbl_hWnd;
 }
