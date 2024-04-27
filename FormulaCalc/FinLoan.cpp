@@ -11,9 +11,16 @@ FinLoan::FinLoan()
 {
     hInst = GetModuleHandle(NULL);
 
+    amount = 0.0;
+    rate = 0.0;
+    monthPay = 0.0;
+    months = 0;
+    result = 0.0;
+
     hLblAmount = nullptr;
     hLblRate = nullptr;
     hLblMonths = nullptr;
+    hLblResult = nullptr;
 
     hInAmount = nullptr;
     hInRate = nullptr;
@@ -46,8 +53,9 @@ LRESULT FinLoan::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case QUADFORM_CLEAR_BUTTON:
             ClearFinLoanText();
             break;
-        case FINLOAN_CALCAMOUNT_BUTTON:
-            CalcFinLoan();
+        case FINLOAN_CALC_AMOUNT_BUTTON:
+            //calc = &FinLoan::CalcFinLoanAmount;
+            //FinLoanCalcThunk(CalcFinLoanAmount());
             break;
         case FINLOAN_CLOSE_BUTTON:
             flWndCreated = 0;
@@ -107,7 +115,8 @@ void FinLoan::FinLoanInterface()
     HWND hComboBoxSelItem = Widget::ComboBox(25, 25, 265, 150, "", m_hWnd, hInst);
     FinLoanDlgList(m_hWnd);
 
-    // Result boxes
+    // Result label and input box.
+    hLblResult = Widget::RLabel(15, 205, 150, 30, "Result:", m_hWnd);
     hRsltFinLoan = Widget::ResultBox(170, 200, 110, 30, m_hWnd);
     
 
@@ -128,7 +137,7 @@ void FinLoan::FinLoanAmountInterface()
     hInRate = Widget::InputBox(200, 120, 80, 30, m_hWnd);
     hInMonths = Widget::InputBox(200, 160, 80, 30, m_hWnd);
 
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)FINLOAN_CALCAMOUNT_BUTTON);
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)FINLOAN_CALC_AMOUNT_BUTTON);
 
 }
 
@@ -243,7 +252,15 @@ std::string FinLoan::ToString(double num)
     return ss.str();
 }
 
-void FinLoan::CalcFinLoan()
+void FinLoan::FinLoanCalcThunk(double(*calcAmt)())
 {
+    // Calculate.
+    result = calcAmt();
+}
 
+double FinLoan::CalcFinLoanAmount()
+{
+    double rsltAmt = (monthPay / rate) * (1 - (1 / pow((1 + rate), months)));
+
+    return rsltAmt;
 }
