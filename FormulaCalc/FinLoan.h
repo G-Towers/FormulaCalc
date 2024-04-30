@@ -59,11 +59,21 @@ public:
 	std::string ToString(double num);
 	// Convert to string.
 
-	void FinLoanCalcThunk(double(*calc)());
+	void FinLoanCalcThunk(FinLoan* obj, double(FinLoan::*calc)());
 	// Input conversion and calls to Calculate functions using pointer.
 
 	double CalcFinLoanAmount();
-	// Calculates the quadratic formula.
+	// Calculates the loan amount.
+
+	double CalcFinLoanRate();
+	// Calculates the loan interst rate.
+
+	double CalcFinLoanMonths();
+	// Calculates the number of months to pay the loan.
+
+	double CalcFinLoanPayment();
+	// Calculates the monthly payment.
+
 
 	static BOOL flWndCreated;	// Flag for window created.
 	static FinLoan finLoanObj;
@@ -73,7 +83,7 @@ private:
 
 	static FinLoan* inst;	// To use with InstFinLoanWnd().
 
-	typedef double(FinLoan::*fncPtr);
+	typedef double(FinLoan::*fncPtr)();		// Function Pointer.
 	fncPtr calc;
 
 	// Variables.
@@ -81,15 +91,24 @@ private:
 	double rate;
 	double monthPay;
 	int months;
-	double result;
+	//double result;
+
+	// Char arrays.
+	char amountText[100] = { "" };
+	char monthPayText[100] = { "" };
+	char rateText[100] = { "" };
+	char monthsText[100] = { "" };
+	char resultText[100] = { "" };
 
 	// Labels.
+	HWND hLblMonthPay;
 	HWND hLblAmount;
 	HWND hLblRate;
 	HWND hLblMonths;
 	HWND hLblResult;
 
 	// Input Boxes.
+	HWND hInMonthPay;
 	HWND hInAmount;
 	HWND hInRate;
 	HWND hInMonths;
