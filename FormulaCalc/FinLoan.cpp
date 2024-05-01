@@ -53,26 +53,26 @@ LRESULT FinLoan::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (wmId)
         {
         case FINLOAN_CALC_AMOUNT_BUTTON:
-            calc = &FinLoan::CalcFinLoanAmount;
+            //calc = &FinLoan::CalcFinLoanAmount;
             FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanAmount);
             break;
 
         case FINLOAN_CALC_RATE_BUTTON:
-            calc = &FinLoan::CalcFinLoanRate;
+            //calc = &FinLoan::CalcFinLoanRate;
             FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanRate);
             break;
 
         case FINLOAN_CALC_MONTHS_BUTTON:
-            calc = &FinLoan::CalcFinLoanMonths;
+            //calc = &FinLoan::CalcFinLoanMonths;
             FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanMonths);
             break;
 
         case FINLOAN_CALC_PAYMENT_BUTTON:
-            calc = &FinLoan::CalcFinLoanPayment;
+            //calc = &FinLoan::CalcFinLoanPayment;
             FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanPayment);
             break;
 
-        case QUADFORM_CLEAR_BUTTON:
+        case FINLOAN_CLEAR_BUTTON:
             ClearFinLoanText();
             break;
         
@@ -339,11 +339,13 @@ std::string FinLoan::ToString(double num)
 void FinLoan::FinLoanCalcThunk(FinLoan* obj, double(FinLoan::* calc)())
 {
     // Retrieve input box text.
+    GetWindowText(hInAmount, amountText, 100 );
     GetWindowText(hInRate, rateText, 100);
     GetWindowText(hInMonths, monthsText, 100);
     GetWindowText(hInMonthPay, monthPayText, 100);
 
     // Convert  to double.
+    amount = strtod(amountText, nullptr);
     rate = strtod(rateText, nullptr);
     months = (int)strtod(monthsText, nullptr);
     monthPay = strtod(monthPayText, nullptr);
@@ -369,15 +371,26 @@ double FinLoan::CalcFinLoanAmount()
 
 double FinLoan::CalcFinLoanRate()
 {
-    return 0.0;
+    double intRate = rate * 0.01 / 12;
+    double rsltAmt = 0.0;
+
+    return rsltAmt;
 }
 
 double FinLoan::CalcFinLoanMonths()
 {
-    return 0.0;
+    double intRate = rate * 0.01 / 12;
+    double rsltAmt = log((monthPay / intRate) / ((monthPay / intRate) - amount)) 
+            / log(1 + intRate);
+
+    return rsltAmt;
 }
 
 double FinLoan::CalcFinLoanPayment()
 {
-    return 0.0;
+    double intRate = rate * 0.01 / 12;
+    double rsltAmt = (amount * intRate * (pow((1 + intRate), months))) 
+            / (pow((1 + intRate), months) - 1);
+
+    return rsltAmt;
 }
