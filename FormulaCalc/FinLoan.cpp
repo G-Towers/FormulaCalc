@@ -12,6 +12,7 @@ FinLoan::FinLoan()
     hInst = GetModuleHandle(NULL);
 
     amount = 0.0;
+    monthRate = 0.0;
     rate = 0.0;
     monthPay = 0.0;
     months = 0;
@@ -371,10 +372,49 @@ double FinLoan::CalcFinLoanAmount()
 
 double FinLoan::CalcFinLoanRate()
 {
-    double intRate = rate * 0.01 / 12;
-    double rsltAmt = 0.0;
+    double r0 = 0.01;           // Initial guess for the interest rate (1%).
+    double r1 = 0.0;
+    double tol = 0.000001;      // Tolerance level.
+    int max_iterations = 20;    // Maximum number of iterations.
+   
 
-    return rsltAmt;
+    for (int i = 0; i < max_iterations; ++i)
+    {
+        double funcRate = NRFuncRate(r0);
+        double funcRate_Prime = NRFuncRate_Prime(r0);
+
+        if (fabs(funcRate_Prime) < tol)
+        {
+            return 0;
+            //break;
+        }
+
+        r1 = r0 - funcRate / funcRate_Prime; // Newton-Raphson iteration.
+
+        if (fabs(r1 - r0) < tol)  // Check for convergence
+        {
+            // Convert to annual percentage rate and return.
+            return (pow(1 + r1, 12) - 1) * 100; 
+
+        }
+
+        r0 = r1; // Update guess for next iteration.
+    }
+    
+    
+
+    //return rsltAmt;
+
+}
+
+double FinLoan::NRFuncRate(double RT)
+{
+    return amount * RT - monthPay * (1 - 1 / pow(1 + RT, months));
+}
+
+double FinLoan::NRFuncRate_Prime(double RT)
+{
+    return amount - monthPay * months * pow(1 + RT, -(months + 1));
 }
 
 double FinLoan::CalcFinLoanMonths()

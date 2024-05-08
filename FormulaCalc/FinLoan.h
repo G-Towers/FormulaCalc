@@ -66,7 +66,17 @@ public:
 	// Calculates the loan amount.
 
 	double CalcFinLoanRate();
-	// Calculates the loan interst rate.
+	// Calculates the annual interst rate.
+	// Calls NRFuncRate() and NRFuncRate_Prime to calculate the annual interest
+	// rate with annual compounding.
+
+	double NRFuncRate(double RT);
+	// Uses the Newton-Raphson Method to calculate annual interest rate with
+	// annual compounding. RT is the rate as it updates.
+
+	double NRFuncRate_Prime(double RT);
+	// Derivative function for the Newton-Raphson Method used to calculate annual 
+	// interest rate with annual compounding. RT is the rate as it updates.
 
 	double CalcFinLoanMonths();
 	// Calculates the number of months to pay the loan.
@@ -87,10 +97,11 @@ private:
 	fncPtr calc;
 
 	// Variables.
-	double amount;
-	double rate;
-	double monthPay;
-	int months;
+	double amount;		// Principal.
+	double monthRate;	// Monthly rate.
+	double rate;		// Annual rate.
+	double monthPay;	// Monthly payment.
+	int months;			// Number of monthly payments.
 	//double result;
 
 	// Char arrays.
