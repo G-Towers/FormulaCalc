@@ -50,7 +50,7 @@ public:
 	void ReInit();
 	// Reinitialize values (Reset to 0).
 
-	int UserIn();
+	int UserIn(HWND hWndA, HWND hWndB, HWND hWndC);
 	// User input and validation.
 
 	double StringToDouble(const std::string& str);
@@ -84,7 +84,14 @@ public:
 	double CalcFinLoanPayment();
 	// Calculates the monthly payment.
 
+	void HandleToString(HWND hwnd, const std::string& str) { msgBxStrMap[hwnd] = str; }
+	// Function to associate an HWND with a string.
 
+	std::string GetStringFromHandle(HWND hwnd); 
+	// Function to get the string associated with an HWND.
+
+	 
+	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL flWndCreated;	// Flag for window created.
 	static FinLoan finLoanObj;
 
@@ -110,6 +117,11 @@ private:
 	char rateText[100] = { "" };
 	char monthsText[100] = { "" };
 	char resultText[100] = { "" };
+
+	char charArrA[100] = { "" };
+	char charArrB[100] = { "" };
+	char charArrC[100] = { "" };
+	char charArrD[100] = { "" };
 
 	// Labels.
 	HWND hLblMonthPay;

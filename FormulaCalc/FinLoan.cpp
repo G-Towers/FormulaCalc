@@ -313,9 +313,104 @@ void FinLoan::ReInit()
     months = 0;
 }
 
-int FinLoan::UserIn()
+int FinLoan::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
 {
-	return 0;
+    // Declare variables.
+    int swVal;
+    double dblResult = 0.0;
+    std::string strResult;
+
+    GetWindowText(hWndA, charArrA, 100);	// Retrieve hWndA.
+    GetWindowText(hWndB, charArrB, 100);    // Retrieve hWndB.
+    GetWindowText(hWndC, charArrC, 100);	// Retrieve hWndC.
+
+    // Map message strings to input boxes.
+    HandleToString(hInAmount, "Loan Amount is not a valid number!\nPlease enter Loan Amount as a valid number."
+        "\nSee -- Help \\ Info-- for more information.");
+    HandleToString(hInMonthPay, "Monthly Payment is not a valid number!\nPlease enter Monthly Payment as a valid number."
+        "\nSee -- Help \\ Info-- for more information.");
+    HandleToString(hInRate, "Interest Rate is not a valid number!\nPlease enter Interest Rate as a valid number."
+        "\nSee -- Help \\ Info-- for more information.");
+    HandleToString(hInMonths, "Months is not a valid number!\nPlease enter Months as a valid number."
+        "\nSee -- Help \\ Info-- for more information.");
+
+    // Validate user input.
+    if (strcmp(charArrA, "") == 0 || strcmp(charArrB, "") == 0 || strcmp(charArrC, "") == 0)
+    {
+        swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter all values.",
+            NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+        switch (swVal)
+        {
+        case IDCANCEL:
+            DestroyWindow(m_hWnd);
+            return 0;
+
+        case IDOK:
+            return 0;
+
+        }
+
+    }
+
+    for (size_t i = 0; i < strlen(charArrA); i++)
+    {
+        if (!isdigit(charArrA[i]) && charArrA[i] != '.' && charArrA[i] != ',')
+        {
+            swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndA).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+            switch (swVal)
+            {
+            case IDCANCEL:
+                DestroyWindow(m_hWnd);
+                return 0;
+
+            case IDOK:
+                return 0;
+
+            }
+        }
+    }
+
+    for (size_t i = 0; i < strlen(charArrB); i++)
+    {
+        if (!isdigit(charArrB[i]) && charArrB[i] != '.' && charArrB[i] != ',')
+        {
+            swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndB).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+            switch (swVal)
+            {
+            case IDCANCEL:
+                DestroyWindow(m_hWnd);
+                return 0;
+
+            case IDOK:
+                return 0;
+
+            }
+        }
+    }
+
+    for (size_t i = 0; i < strlen(charArrC); i++)
+    {
+        if (!isdigit(charArrC[i]) && charArrC[i] != '.' && charArrC[i] != ',')
+        {
+            swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndC).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+            switch (swVal)
+            {
+            case IDCANCEL:
+                DestroyWindow(m_hWnd);
+                return 0;
+
+            case IDOK:
+                return 0;
+
+            }
+        }
+    }
+
+    return (BOOL)TRUE;
 }
 
 double FinLoan::StringToDouble(const std::string& str)
@@ -354,6 +449,7 @@ void FinLoan::FinLoanCalcThunk(FinLoan* obj, double(FinLoan::* calc)())
     // Calculate.
     double result = (obj->*calc)();
 
+
     // Display.
     std::string resultString = ToString(result); // Get the string.
     strcpy_s(resultText, resultString.c_str());   // Convert to C-string
@@ -364,46 +460,56 @@ void FinLoan::FinLoanCalcThunk(FinLoan* obj, double(FinLoan::* calc)())
 
 double FinLoan::CalcFinLoanAmount()
 {
-    double intRate = rate * 0.01 / 12;
-    double rsltAmt = (monthPay / intRate) * (1 - (1 / (pow((1 + intRate), months))));
+    int inOk = UserIn(hInRate, hInMonths, hInMonthPay);
 
-    return rsltAmt;
+    if (inOk)
+    {
+        double intRate = rate * 0.01 / 12;
+        double rsltAmt = (monthPay / intRate) * (1 - (1 / (pow((1 + intRate), months))));
+
+        return rsltAmt;
+    }
+
+    return 0;
 }
 
 double FinLoan::CalcFinLoanRate()
 {
-    double r0 = 0.01;           // Initial guess for the interest rate (1%).
-    double r1 = 0.0;
-    double tol = 0.000001;      // Tolerance level.
-    int max_iterations = 20;    // Maximum number of iterations.
-   
+    int inOk = UserIn(hInAmount, hInMonths, hInMonthPay);
 
-    for (int i = 0; i < max_iterations; ++i)
+    if (inOk)
     {
-        double funcRate = NRFuncRate(r0);
-        double funcRate_Prime = NRFuncRate_Prime(r0);
+        double r0 = 0.01;           // Initial guess for the interest rate (1%).
+        double r1 = 0.0;
+        double tol = 0.000001;      // Tolerance level.
+        int max_iterations = 20;    // Maximum number of iterations.
 
-        if (fabs(funcRate_Prime) < tol)
+
+        for (int i = 0; i < max_iterations; ++i)
         {
-            return 0;
-            //break;
+            double funcRate = NRFuncRate(r0);
+            double funcRate_Prime = NRFuncRate_Prime(r0);
+
+            if (fabs(funcRate_Prime) < tol)
+            {
+                return 0;
+                //break;
+            }
+
+            r1 = r0 - funcRate / funcRate_Prime; // Newton-Raphson iteration.
+
+            if (fabs(r1 - r0) < tol)  // Check for convergence
+            {
+                // Convert to annual percentage rate and return.
+                return (pow(1 + r1, 12) - 1) * 100;
+
+            }
+
+            r0 = r1; // Update guess for next iteration.
         }
-
-        r1 = r0 - funcRate / funcRate_Prime; // Newton-Raphson iteration.
-
-        if (fabs(r1 - r0) < tol)  // Check for convergence
-        {
-            // Convert to annual percentage rate and return.
-            return (pow(1 + r1, 12) - 1) * 100; 
-
-        }
-
-        r0 = r1; // Update guess for next iteration.
     }
-    
-    
 
-    //return rsltAmt;
+    return 0;
 
 }
 
@@ -419,18 +525,42 @@ double FinLoan::NRFuncRate_Prime(double RT)
 
 double FinLoan::CalcFinLoanMonths()
 {
-    double intRate = rate * 0.01 / 12;
-    double rsltAmt = log((monthPay / intRate) / ((monthPay / intRate) - amount)) 
+    int inOk = UserIn(hInAmount, hInRate, hInMonthPay);
+
+    if (inOk)
+    {
+        double intRate = rate * 0.01 / 12;
+        double rsltAmt = log((monthPay / intRate) / ((monthPay / intRate) - amount))
             / log(1 + intRate);
 
-    return rsltAmt;
+        return rsltAmt;
+    }
+
+    return 0;
 }
 
 double FinLoan::CalcFinLoanPayment()
 {
-    double intRate = rate * 0.01 / 12;
-    double rsltAmt = (amount * intRate * (pow((1 + intRate), months))) 
+    int inOk = UserIn(hInAmount, hInRate, hInMonths);
+
+    if (inOk)
+    {
+        double intRate = rate * 0.01 / 12;
+        double rsltAmt = (amount * intRate * (pow((1 + intRate), months)))
             / (pow((1 + intRate), months) - 1);
 
-    return rsltAmt;
+        return rsltAmt;
+    }
+
+    return 0;
+}
+
+std::string FinLoan::GetStringFromHandle(HWND hwnd)
+{
+    auto it = msgBxStrMap.find(hwnd);
+    if (it != msgBxStrMap.end()) {
+        return it->second;
+    }
+
+    return ""; // Return an empty string if the handle is not found.
 }
