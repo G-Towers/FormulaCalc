@@ -11,7 +11,7 @@ FinLoan::FinLoan()
 {
     hInst = GetModuleHandle(NULL);
 
-    amount = 0.0;
+    principal = 0.0;
     monthRate = 0.0;
     rate = 0.0;
     monthPay = 0.0;
@@ -55,7 +55,7 @@ LRESULT FinLoan::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
         case FINLOAN_CALC_AMOUNT_BUTTON:
             //calc = &FinLoan::CalcFinLoanAmount;
-            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanAmount);
+            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanPrincipal);
             break;
 
         case FINLOAN_CALC_RATE_BUTTON:
@@ -307,7 +307,7 @@ void FinLoan::ClearFinLoanText()
 
 void FinLoan::ReInit()
 {
-    amount = 0.0;
+    principal = 0.0;
     rate = 0.0;
     monthPay = 0.0;
     months = 0;
@@ -432,7 +432,7 @@ std::string FinLoan::ToString(double num)
     return ss.str();
 }
 
-void FinLoan::FinLoanCalcThunk(FinLoan* obj, double(FinLoan::* calc)())
+void FinLoan::FinLoanCalcThunk(FinLoan* obj, void(FinLoan::* calc)())
 {
     // Retrieve input box text.
     GetWindowText(hInAmount, amountText, 100 );
@@ -441,39 +441,36 @@ void FinLoan::FinLoanCalcThunk(FinLoan* obj, double(FinLoan::* calc)())
     GetWindowText(hInMonthPay, monthPayText, 100);
 
     // Convert  to double.
-    amount = strtod(amountText, nullptr);
+    principal = strtod(amountText, nullptr);
     rate = strtod(rateText, nullptr);
     months = (int)strtod(monthsText, nullptr);
     monthPay = strtod(monthPayText, nullptr);
 
     // Calculate.
-    double result = (obj->*calc)();
-
-
-    // Display.
-    std::string resultString = ToString(result); // Get the string.
-    strcpy_s(resultText, resultString.c_str());   // Convert to C-string
-
-    SetWindowText(hRsltFinLoan, resultText);	// Display the result.
+    (obj->*calc)();
 
 }
 
-double FinLoan::CalcFinLoanAmount()
+void FinLoan::CalcFinLoanPrincipal()
 {
     int inOk = UserIn(hInRate, hInMonths, hInMonthPay);
 
     if (inOk)
     {
         double intRate = rate * 0.01 / 12;
-        double rsltAmt = (monthPay / intRate) * (1 - (1 / (pow((1 + intRate), months))));
+        result = (monthPay / intRate) * (1 - (1 / (pow((1 + intRate), months))));
 
-        return rsltAmt;
+        // Display.
+        std::string resultString = ToString(result); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltFinLoan, resultText);	// Display the result.
+
     }
 
-    return 0;
 }
 
-double FinLoan::CalcFinLoanRate()
+void FinLoan::CalcFinLoanRate()
 {
     int inOk = UserIn(hInAmount, hInMonths, hInMonthPay);
 
@@ -492,67 +489,79 @@ double FinLoan::CalcFinLoanRate()
 
             if (fabs(funcRate_Prime) < tol)
             {
-                return 0;
-                //break;
+                break;
             }
 
             r1 = r0 - funcRate / funcRate_Prime; // Newton-Raphson iteration.
 
             if (fabs(r1 - r0) < tol)  // Check for convergence
             {
-                // Convert to annual percentage rate and return.
-                return (pow(1 + r1, 12) - 1) * 100;
+                // Convert to annual percentage rate and assign to result.
+                result =  (pow(1 + r1, 12) - 1) * 100;
 
             }
 
             r0 = r1; // Update guess for next iteration.
         }
+
+        // Display.
+        std::string resultString = ToString(result); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltFinLoan, resultText);	// Display the result.
     }
 
-    return 0;
 
 }
 
 double FinLoan::NRFuncRate(double RT)
 {
-    return amount * RT - monthPay * (1 - 1 / pow(1 + RT, months));
+    return principal * RT - monthPay * (1 - 1 / pow(1 + RT, months));
 }
 
 double FinLoan::NRFuncRate_Prime(double RT)
 {
-    return amount - monthPay * months * pow(1 + RT, -(months + 1));
+    return principal - monthPay * months * pow(1 + RT, -(months + 1));
 }
 
-double FinLoan::CalcFinLoanMonths()
+void FinLoan::CalcFinLoanMonths()
 {
     int inOk = UserIn(hInAmount, hInRate, hInMonthPay);
 
     if (inOk)
     {
         double intRate = rate * 0.01 / 12;
-        double rsltAmt = log((monthPay / intRate) / ((monthPay / intRate) - amount))
+        result = log((monthPay / intRate) / ((monthPay / intRate) - principal))
             / log(1 + intRate);
 
-        return rsltAmt;
+        // Display.
+        std::string resultString = ToString(result); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltFinLoan, resultText);	// Display the result.
+
     }
 
-    return 0;
 }
 
-double FinLoan::CalcFinLoanPayment()
+void FinLoan::CalcFinLoanPayment()
 {
     int inOk = UserIn(hInAmount, hInRate, hInMonths);
 
     if (inOk)
     {
         double intRate = rate * 0.01 / 12;
-        double rsltAmt = (amount * intRate * (pow((1 + intRate), months)))
+        result = (principal * intRate * (pow((1 + intRate), months)))
             / (pow((1 + intRate), months) - 1);
 
-        return rsltAmt;
+        // Display.
+        std::string resultString = ToString(result); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltFinLoan, resultText);	// Display the result.
+
     }
 
-    return 0;
 }
 
 std::string FinLoan::GetStringFromHandle(HWND hwnd)

@@ -59,13 +59,13 @@ public:
 	std::string ToString(double num);
 	// Convert to string.
 
-	void FinLoanCalcThunk(FinLoan* obj, double(FinLoan::*calc)());
+	void FinLoanCalcThunk(FinLoan* obj, void(FinLoan::*calc)());
 	// Input conversion and calls to Calculate functions using pointer.
 
-	double CalcFinLoanAmount();
+	void CalcFinLoanPrincipal();
 	// Calculates the loan amount.
 
-	double CalcFinLoanRate();
+	void CalcFinLoanRate();
 	// Calculates the annual interst rate.
 	// Calls NRFuncRate() and NRFuncRate_Prime to calculate the annual interest
 	// rate with annual compounding.
@@ -78,10 +78,10 @@ public:
 	// Derivative function for the Newton-Raphson Method used to calculate annual 
 	// interest rate with annual compounding. RT is the rate as it updates.
 
-	double CalcFinLoanMonths();
+	void CalcFinLoanMonths();
 	// Calculates the number of months to pay the loan.
 
-	double CalcFinLoanPayment();
+	void CalcFinLoanPayment();
 	// Calculates the monthly payment.
 
 	void HandleToString(HWND hwnd, const std::string& str) { msgBxStrMap[hwnd] = str; }
@@ -100,16 +100,16 @@ private:
 
 	static FinLoan* inst;	// To use with InstFinLoanWnd().
 
-	typedef double(FinLoan::*fncPtr)();		// Function Pointer.
+	typedef void(FinLoan::*fncPtr)();		// Function Pointer.
 	fncPtr calc;
 
 	// Variables.
-	double amount;		// Principal.
+	double principal;	// Original amount of loan.
 	double monthRate;	// Monthly rate.
 	double rate;		// Annual rate.
 	double monthPay;	// Monthly payment.
 	int months;			// Number of monthly payments.
-	//double result;
+	double result;
 
 	// Char arrays.
 	char amountText[100] = { "" };
