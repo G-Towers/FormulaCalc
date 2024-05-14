@@ -57,18 +57,49 @@ public:
 	void ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	// Combobox selection conditions.
 
+	void ReInit();
+	// Reinitialize values (Reset to 0).
 
+	void VolumeInputThunk(VolWnd* obj, double(VolWnd::*calc)());
+	// Input conversion and calls to Calculate functions using pointer.
+
+	double CalcVolTriangle();
+	// Calculates volume of a triangular prism.
+
+	double CalcVolRectangle();
+	// Calculates volume of a rectangular prism.
+
+	double CalcVolSphere();
+	// Calculates volume of a sphere.
+
+	double CalcVolCylinder();
+	// Calculates volume of a cylinder.
+
+	double CalcVolCone();
+	// Calculates volume of a cone.
+
+	double CalcVolFrustum();
+	// Calculates volume of the frustum of a cone.
+
+	double CalcVolPyramid();
+	// Calculates volume of the frustum of a cone.
+
+	std::string ToString(double num);
+	// Convert double to string.
 
 	~VolWnd();
 
 	static BOOL volWndCreated;	// Volume window is created.
+	static VolWnd volObj;	// Access the object from anywhere.
 
-public:
+private:
 	double length, base, height, width, radius,
 		lowRadius, result;
 
-	static VolWnd volObj;	// Access the object from anywhere.
 	static VolWnd* inst;	// To use with InstVolWnd().
+
+	typedef void(VolWnd::* fncPtr)();		// Function Pointer.
+	fncPtr calc;
 
 	HWND hComboBoxSelItem;	// ComboBox.
 
@@ -98,29 +129,4 @@ public:
 
 };
 
-void VolumeInputThunk(double(*calc)());
-// Input conversion and calls to Calculate functions using pointer.
 
-double CalcVolTriangle();
-// Calculates volume of a triangular prism.
-
-double CalcVolRectangle();
-// Calculates volume of a rectangular prism.
-
-double CalcVolSphere();
-// Calculates volume of a sphere.
-
-double CalcVolCylinder();
-// Calculates volume of a cylinder.
-
-double CalcVolCone();
-// Calculates volume of a cone.
-
-double CalcVolFrustum();
-// Calculates volume of the frustum of a cone.
-
-double CalcVolPyramid();
-// Calculates volume of the frustum of a cone.
-
-std::string ToString(double num);
-// Convert double to string.

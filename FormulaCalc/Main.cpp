@@ -30,15 +30,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 		while ((gResult = GetMessage(&msg, NULL, 0, 0)) > 0)
 		{
-			//TranslateMessage(&msg); // Translate virtual-key messages into character messages.
-			//DispatchMessage(&msg);  // Send message to windows procedure.
+			TranslateMessage(&msg); // Translate virtual-key messages into character messages.
+			DispatchMessage(&msg);  // Send message to windows procedure.
 
-			// To use tabstops.
-			if (!IsDialogMessage(VolWnd::volObj.GetWinHandle(), &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
+			//// To use tabstops.
+			//if (!IsDialogMessage(VolWnd::volObj.GetWinHandle(), &msg))
+			//{
+			//	TranslateMessage(&msg);
+			//	DispatchMessage(&msg);
+			//}
 		}
 
 		// Check GetMessage for error.

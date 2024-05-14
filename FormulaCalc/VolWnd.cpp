@@ -53,25 +53,25 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case VOLUME_CALCULATE_TRI_BUTTON:
-			VolumeInputThunk(&CalcVolTriangle);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolTriangle);
 			break;
 		case VOLUME_CALCULATE_RECT_BUTTON:
-			VolumeInputThunk(&CalcVolRectangle);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolRectangle);
 			break;
 		case VOLUME_CALCULATE_SPHERE_BUTTON:
-			VolumeInputThunk(&CalcVolSphere);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolSphere);
 			break;
 		case VOLUME_CALCULATE_CYLINDER_BUTTON:
-			VolumeInputThunk(&CalcVolCylinder);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolCylinder);
 			break;
 		case VOLUME_CALCULATE_CONE_BUTTON:
-			VolumeInputThunk(&CalcVolCone);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolCone);
 			break;
 		case VOLUME_CALCULATE_FRUSTUM_BUTTON:
-			VolumeInputThunk(&CalcVolFrustum);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolFrustum);
 			break;
 		case VOLUME_CALCULATE_PYRAMID_BUTTON:
-			VolumeInputThunk(&CalcVolPyramid);
+			VolumeInputThunk(&volObj, &VolWnd::CalcVolPyramid);
 			break;
 		case VOLUME_CLEAR_BUTTON:
 			ClearVolumeText();
@@ -396,21 +396,20 @@ void VolWnd::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 }
 
-VolWnd::~VolWnd()
+void VolWnd::ReInit()
 {
-	//DestroyWindow(m_hWnd);
-	//UnregisterClass("VolWndClass", GetModuleHandle(NULL));
+	length = 0.0;
+	base = 0.0;
+	height = 0.0;
+	width = 0.0;
+	radius = 0.0;
+	lowRadius = 0.0;
+	result = 0.0;
 }
 
-void VolumeInputThunk(double(* calc)())
+void VolWnd::VolumeInputThunk(VolWnd* obj, double(VolWnd::*calc)())
 {
-	VolWnd::volObj.length = 0.0;
-	VolWnd::volObj.base = 0.0;
-	VolWnd::volObj.height = 0.0;
-	VolWnd::volObj.width = 0.0;
-	VolWnd::volObj.radius = 0.0;
-	VolWnd::volObj.lowRadius = 0.0;
-	VolWnd::volObj.result = 0.0;
+	ReInit();
 
 	char lengthText[100] = { "" }, baseText[100] = { "" }, heightText[100] = { "" },
 		widthText[100] = { "" }, radiusText[100] = { "" }, lowRadiusText[100] = { "" },
@@ -419,94 +418,76 @@ void VolumeInputThunk(double(* calc)())
 	std::string resultString;
 
 	// Retrieve input box text.
-	GetWindowText(VolWnd::volObj.hLengthBox, lengthText, 100);
-	GetWindowText(VolWnd::volObj.hBaseBox, baseText, 100);
-	GetWindowText(VolWnd::volObj.hHeightBox, heightText, 100);
-	GetWindowText(VolWnd::volObj.hWidthBox, widthText, 100);
-	GetWindowText(VolWnd::volObj.hRadiusBox, radiusText, 100);
-	GetWindowText(VolWnd::volObj.hLowRadiusBox, lowRadiusText, 100);
+	GetWindowText(hLengthBox, lengthText, 100);
+	GetWindowText(hBaseBox, baseText, 100);
+	GetWindowText(hHeightBox, heightText, 100);
+	GetWindowText(hWidthBox, widthText, 100);
+	GetWindowText(hRadiusBox, radiusText, 100);
+	GetWindowText(hLowRadiusBox, lowRadiusText, 100);
 
 	// Convert  to double.
-	VolWnd::volObj.length = strtod(lengthText, nullptr);
-	VolWnd::volObj.base = strtod(baseText, nullptr);
-	VolWnd::volObj.height = strtod(heightText, nullptr);
-	VolWnd::volObj.width = strtod(widthText, nullptr);
-	VolWnd::volObj.radius = strtod(radiusText, nullptr);
-	VolWnd::volObj.lowRadius = strtod(lowRadiusText, nullptr);
+	length = strtod(lengthText, nullptr);
+	base = strtod(baseText, nullptr);
+	height = strtod(heightText, nullptr);
+	width = strtod(widthText, nullptr);
+	radius = strtod(radiusText, nullptr);
+	lowRadius = strtod(lowRadiusText, nullptr);
 
 	// Calculate the volume.
-	VolWnd::volObj.result = calc();
+	result = (obj->*calc)();
 
-	resultString = ToString(VolWnd::volObj.result); // Get the string.
+	resultString = ToString(result); // Get the string.
 	strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
-	SetWindowText(VolWnd::volObj.hResultBox, resultText);	// Display the result.
+	SetWindowText(hResultBox, resultText);	// Display the result.
 }
 
-double CalcVolTriangle()
+double VolWnd::CalcVolTriangle()
 {
-	// Calculate the volume.
-	double calcResult = (1.0 / 2.0) * VolWnd::volObj.length * VolWnd::volObj.base * VolWnd::volObj.height;
+	return (1.0 / 2.0) * length * base * height;
 
-	return calcResult;
 }
 
-double CalcVolRectangle()
+double VolWnd::CalcVolRectangle()
 {
-	// Calculate the volume.
-	double calcResult = VolWnd::volObj.length * VolWnd::volObj.width * VolWnd::volObj.height;
+	return length * width * height;
 
-	return calcResult;
 }
 
-double CalcVolSphere()
+double VolWnd::CalcVolSphere()
 {
-	// Calculate the volume.
-	double calcResult = (4.0 / 3.0) * PI * VolWnd::volObj.radius * 
-		VolWnd::volObj.radius * VolWnd::volObj.radius;
+	return (4.0 / 3.0) * PI * radius *
+		radius * radius;
 
-	return calcResult;
 }
 
-double CalcVolCylinder()
+double VolWnd::CalcVolCylinder()
 {
-	// Calculate the volume.
-	double calcResult = PI * VolWnd::volObj.radius *
-		VolWnd::volObj.radius * VolWnd::volObj.height;
+	return PI * radius * radius * height;
 
-	return calcResult;
 }
 
-double CalcVolCone()
+double VolWnd::CalcVolCone()
 {
-	// Calculate the volume.
-	double calcResult = (1.0 / 3.0) * PI * VolWnd::volObj.radius *
-		VolWnd::volObj.radius * VolWnd::volObj.height;
+	return (1.0 / 3.0) * PI * radius *
+		radius * height;
 
-	return calcResult;
 }
 
-double CalcVolFrustum()
+double VolWnd::CalcVolFrustum()
 {
-	// Calculate the volume.
-	double calcResult = (1.0 / 3.0) * PI * VolWnd::volObj.height *
-		(VolWnd::volObj.lowRadius * VolWnd::volObj.lowRadius + 
-			VolWnd::volObj.lowRadius * VolWnd::volObj.radius +
-			VolWnd::volObj.radius * VolWnd::volObj.radius);
+	return (1.0 / 3.0) * PI * height * (lowRadius * 
+		lowRadius + lowRadius * radius + radius * radius);
 
-	return calcResult;
 }
 
-double CalcVolPyramid()
+double VolWnd::CalcVolPyramid()
 {
-	// Calculate the volume.
-	double calcResult = (1.0 / 3.0) * VolWnd::volObj.base *
-		VolWnd::volObj.base * VolWnd::volObj.height;
+	return (1.0 / 3.0) * base * base * height;
 
-	return calcResult;
 }
 
-std::string ToString(double num)
+std::string VolWnd::ToString(double num)
 {
 	std::stringstream ss;    // Declare a string stream var.
 
@@ -519,3 +500,10 @@ std::string ToString(double num)
 
 	return ss.str();	// Return as string.
 }
+
+VolWnd::~VolWnd()
+{
+	//DestroyWindow(m_hWnd);
+	//UnregisterClass("VolWndClass", GetModuleHandle(NULL));
+}
+
