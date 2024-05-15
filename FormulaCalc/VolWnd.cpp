@@ -407,7 +407,251 @@ void VolWnd::ReInit()
 	result = 0.0;
 }
 
-void VolWnd::VolumeInputThunk(VolWnd* obj, double(VolWnd::*calc)())
+int VolWnd::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
+{
+	// Declare variables.
+	int swVal;
+	double dblResult = 0.0;
+	std::string strResult;
+
+	GetWindowText(hWndA, charArrA, 100);	// Retrieve hWndA.
+	GetWindowText(hWndB, charArrB, 100);    
+	GetWindowText(hWndC, charArrC, 100);
+
+	GetErrorStrings();
+
+	// Validate user input.
+	if (strcmp(charArrA, "") == 0 || strcmp(charArrB, "") == 0 || strcmp(charArrC, "") == 0)
+	{
+		swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter all values.",
+			NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+		switch (swVal)
+		{
+		case IDCANCEL:
+			DestroyWindow(m_hWnd);
+			return 0;
+
+		case IDOK:
+			return 0;
+
+		}
+
+	}
+
+	for (size_t i = 0; i < strlen(charArrA); i++)
+	{
+		if (!isdigit(charArrA[i]) && charArrA[i] != '.' && charArrA[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndA).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+	for (size_t i = 0; i < strlen(charArrB); i++)
+	{
+		if (!isdigit(charArrB[i]) && charArrB[i] != '.' && charArrB[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndB).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+	for (size_t i = 0; i < strlen(charArrC); i++)
+	{
+		if (!isdigit(charArrC[i]) && charArrC[i] != '.' && charArrC[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndC).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+
+
+	return (BOOL)TRUE;
+}
+
+int VolWnd::UserIn(HWND hWndA, HWND hWndB)
+{
+	int swVal;
+	double dblResult = 0.0;
+	std::string strResult;
+
+	GetWindowText(hWndA, charArrA, 100);
+	GetWindowText(hWndB, charArrB, 100);
+
+	GetErrorStrings();
+
+	// Check if nothing is entered.
+	if (strcmp(charArrA, "") == 0 || strcmp(charArrB, "") == 0)
+	{
+		swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter all values.",
+			NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+		switch (swVal)
+		{
+		case IDCANCEL:
+			DestroyWindow(m_hWnd);
+			return 0;
+
+		case IDOK:
+			return 0;
+
+		}
+
+	}
+
+	for (size_t i = 0; i < strlen(charArrA); i++)
+	{
+		if (!isdigit(charArrA[i]) && charArrA[i] != '.' && charArrA[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndA).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+	for (size_t i = 0; i < strlen(charArrB); i++)
+	{
+		if (!isdigit(charArrB[i]) && charArrB[i] != '.' && charArrB[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndB).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+	return (BOOL)TRUE;
+}
+
+int VolWnd::UserIn(HWND hWndA)
+{
+	int swVal;
+	double dblResult = 0.0;
+	std::string strResult;
+
+	GetWindowText(hWndA, charArrA, 100);
+
+	GetErrorStrings();
+
+	// Check if nothing is entered.
+	if (strcmp(charArrA, "") == 0)
+	{
+		swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter all values.",
+			NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+		switch (swVal)
+		{
+		case IDCANCEL:
+			DestroyWindow(m_hWnd);
+			return 0;
+
+		case IDOK:
+			return 0;
+
+		}
+
+	}
+
+	for (size_t i = 0; i < strlen(charArrA); i++)
+	{
+		if (!isdigit(charArrA[i]) && charArrA[i] != '.' && charArrA[i] != ',')
+		{
+			swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndA).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
+
+			switch (swVal)
+			{
+			case IDCANCEL:
+				DestroyWindow(m_hWnd);
+				return 0;
+
+			case IDOK:
+				return 0;
+
+			}
+		}
+	}
+
+
+	return (BOOL)TRUE;
+}
+
+void VolWnd::GetErrorStrings()
+{
+	// Map message strings to input boxes.
+	HandleToString(hLengthBox, "Length is not a valid number!\nPlease enter Length as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+	HandleToString(hBaseBox, "Base is not a valid number!\nPlease enter Base as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+	HandleToString(hWidthBox, "Width is not a valid number!\nPlease enter Width as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+	HandleToString(hHeightBox, "Height is not a valid number!\nPlease enter Height as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+	HandleToString(hRadiusBox, "Radius is not a valid number!\nPlease enter Radius as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+	HandleToString(hLowRadiusBox, "Lower Radius is not a valid number!\nPlease enter Lower Radius as a valid number."
+		"\nSee -- Help \\ Info-- for more information.");
+}
+
+std::string VolWnd::GetStringFromHandle(HWND hwnd)
+{
+	auto it = msgBxStrMap.find(hwnd);
+	if (it != msgBxStrMap.end()) {
+		return it->second;
+	}
+
+	return ""; // Return an empty string if the handle is not found.
+}
+
+void VolWnd::VolumeInputThunk(VolWnd* obj, void(VolWnd::*calc)())
 {
 	ReInit();
 
@@ -434,56 +678,122 @@ void VolWnd::VolumeInputThunk(VolWnd* obj, double(VolWnd::*calc)())
 	lowRadius = strtod(lowRadiusText, nullptr);
 
 	// Calculate the volume.
-	result = (obj->*calc)();
-
-	resultString = ToString(result); // Get the string.
-	strcpy_s(resultText, resultString.c_str());   // Convert to C-string
-
-	SetWindowText(hResultBox, resultText);	// Display the result.
-}
-
-double VolWnd::CalcVolTriangle()
-{
-	return (1.0 / 2.0) * length * base * height;
+	(obj->*calc)();
 
 }
 
-double VolWnd::CalcVolRectangle()
+void VolWnd::CalcVolTriangle()
 {
-	return length * width * height;
+	int inOk = UserIn(hLengthBox, hBaseBox, hHeightBox);
+
+	if (inOk)
+	{
+		double result = (1.0 / 2.0) * length * base * height;
+
+		std::string resultString = ToString(result); // Get the string.
+		strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+		SetWindowText(hResultBox, resultText);	// Display the result.
+	}
 
 }
 
-double VolWnd::CalcVolSphere()
+void VolWnd::CalcVolRectangle()
 {
-	return (4.0 / 3.0) * PI * radius *
-		radius * radius;
+	int inOk = UserIn(hLengthBox, hWidthBox, hHeightBox);
+
+	if (inOk)
+	{
+		double result = length * width * height;
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
 
 }
 
-double VolWnd::CalcVolCylinder()
+void VolWnd::CalcVolSphere()
 {
-	return PI * radius * radius * height;
+	int inOk = UserIn(hRadiusBox);
+
+	if (inOk)
+	{
+		double result = (4.0 / 3.0) * PI * radius *
+			radius * radius;
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
 
 }
 
-double VolWnd::CalcVolCone()
+void VolWnd::CalcVolCylinder()
 {
-	return (1.0 / 3.0) * PI * radius *
-		radius * height;
+	int inOk = UserIn(hHeightBox, hRadiusBox);
+	
+	if (inOk)
+	{
+		double result = PI * radius * radius * height;
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
 
 }
 
-double VolWnd::CalcVolFrustum()
+void VolWnd::CalcVolCone()
 {
-	return (1.0 / 3.0) * PI * height * (lowRadius * 
-		lowRadius + lowRadius * radius + radius * radius);
+	int inOk = UserIn(hRadiusBox, hHeightBox);
+
+	if (inOk)
+	{
+		double result = (1.0 / 3.0) * PI * radius *
+			radius * height;
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
 
 }
 
-double VolWnd::CalcVolPyramid()
+void VolWnd::CalcVolFrustum()
 {
-	return (1.0 / 3.0) * base * base * height;
+	int inOk = UserIn(hRadiusBox, hLowRadiusBox, hHeightBox);
+
+	if (inOk)
+	{
+		double result = (1.0 / 3.0) * PI * height * (lowRadius *
+			lowRadius + lowRadius * radius + radius * radius);
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
+
+}
+
+void VolWnd::CalcVolPyramid()
+{
+	int inOk = UserIn(hBaseBox, hHeightBox);
+
+	if (inOk)
+	{
+		double result = (1.0 / 3.0) * base * base * height;
+
+		std::string resultString = ToString(result);
+		strcpy_s(resultText, resultString.c_str());
+
+		SetWindowText(hResultBox, resultText);
+	}
 
 }
 

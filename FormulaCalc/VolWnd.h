@@ -60,28 +60,46 @@ public:
 	void ReInit();
 	// Reinitialize values (Reset to 0).
 
-	void VolumeInputThunk(VolWnd* obj, double(VolWnd::*calc)());
+	int UserIn(HWND hWndA, HWND hWndB, HWND hWndC);
+	// User input and validation.
+
+	int UserIn(HWND hWndA, HWND hWndB);
+	// Overloaded user input and validation.
+
+	int UserIn(HWND hWndA);
+	// Overloaded user input and validation.
+
+	void HandleToString(HWND hwnd, const std::string& str) { msgBxStrMap[hwnd] = str; }
+	// Function to associate an HWND with a string.
+
+	void GetErrorStrings();
+	// Gets error strings for user input validation.
+
+	std::string GetStringFromHandle(HWND hwnd);
+	// Function to get the string associated with an HWND.
+
+	void VolumeInputThunk(VolWnd* obj, void(VolWnd::*calc)());
 	// Input conversion and calls to Calculate functions using pointer.
 
-	double CalcVolTriangle();
+	void CalcVolTriangle();
 	// Calculates volume of a triangular prism.
 
-	double CalcVolRectangle();
+	void CalcVolRectangle();
 	// Calculates volume of a rectangular prism.
 
-	double CalcVolSphere();
+	void CalcVolSphere();
 	// Calculates volume of a sphere.
 
-	double CalcVolCylinder();
+	void CalcVolCylinder();
 	// Calculates volume of a cylinder.
 
-	double CalcVolCone();
+	void CalcVolCone();
 	// Calculates volume of a cone.
 
-	double CalcVolFrustum();
+	void CalcVolFrustum();
 	// Calculates volume of the frustum of a cone.
 
-	double CalcVolPyramid();
+	void CalcVolPyramid();
 	// Calculates volume of the frustum of a cone.
 
 	std::string ToString(double num);
@@ -89,6 +107,7 @@ public:
 
 	~VolWnd();
 
+	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL volWndCreated;	// Volume window is created.
 	static VolWnd volObj;	// Access the object from anywhere.
 
@@ -102,6 +121,16 @@ private:
 	fncPtr calc;
 
 	HWND hComboBoxSelItem;	// ComboBox.
+
+	// Char arrays.
+	char charArrA[100] = { "" };
+	char charArrB[100] = { "" };
+	char charArrC[100] = { "" };
+	char charArrD[100] = { "" };
+	char charArrE[100] = { "" };
+	char charArrF[100] = { "" };
+
+	char resultText[100] = { "" };
 
 	// Labels
 	HWND hLengthLabel;
