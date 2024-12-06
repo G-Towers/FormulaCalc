@@ -42,6 +42,12 @@
     <ClCompile Include="FinLoan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Diff.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Integrate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VolWnd.h">
@@ -69,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FinLoan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Diff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Integrate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

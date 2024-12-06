@@ -133,8 +133,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Diff.cpp" />
     <ClCompile Include="FinLoan.cpp" />
     <ClCompile Include="GTException.cpp" />
+    <ClCompile Include="Integrate.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="QuadForm.cpp" />
     <ClCompile Include="StanDev.cpp" />
@@ -144,8 +146,10 @@
     <ClCompile Include="WinMsgMap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Diff.h" />
     <ClInclude Include="FinLoan.h" />
     <ClInclude Include="GTException.h" />
+    <ClInclude Include="Integrate.h" />
     <ClInclude Include="QuadForm.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StanDev.h" />

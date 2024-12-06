@@ -4,6 +4,8 @@
 #include "VolWnd.h"
 #include "StanDev.h"
 #include "QuadForm.h"
+#include "Diff.h"
+#include "Integrate.h"
 #include "FinLoan.h"
 #include "WinMsgMap.h"
 
@@ -93,9 +95,19 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case ID_ALGEBRA_QUADRATICFORMULA:
 			QuadForm::quadFormObj.QuadFormWnd();
 			break;
+
+		case ID_CALCULUS_DIFFRENTIATION:
+			Diff::diffObj.DiffWnd();
+			break;
+
+		case ID_CALCULUS_INTEGRATION:
+			Integrate::integrateObj.IntegrateWnd();
+			break;
+
 		case ID_FINANCE_LOAN:
 			FinLoan::finLoanObj.FinLoanWnd();
 			break;
+
 		case ID_FILE_EXIT:
 			if (MessageBox(m_hWnd, " Are you sure you want to quit?", "Quit?", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
 			{
