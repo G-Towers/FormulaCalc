@@ -1,6 +1,7 @@
 // Derivatives
 
 #include "Diff.h"
+
 Diff Diff::diffObj;
 Diff* Diff::inst = nullptr;
 BOOL Diff::diffWndCreated = 0;

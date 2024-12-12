@@ -7,6 +7,7 @@
 #include "Diff.h"
 #include "Integrate.h"
 #include "FinLoan.h"
+#include "CompInt.h"
 #include "WinMsgMap.h"
 
 BOOL VolWnd::volWndCreated = 0;
@@ -102,6 +103,10 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case ID_CALCULUS_INTEGRATION:
 			Integrate::integrateObj.IntegrateWnd();
+			break;
+
+		case ID_FINANCE_COMPOUNDINTEREST:
+			CompInt::compIntObj.CompIntWnd();
 			break;
 
 		case ID_FINANCE_LOAN:

@@ -48,6 +48,9 @@
     <ClCompile Include="Integrate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CompInt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VolWnd.h">
@@ -81,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Integrate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CompInt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
