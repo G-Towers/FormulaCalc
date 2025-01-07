@@ -14,6 +14,7 @@ namespace Widget
 	HWND InputBox(int posx, int posy, int width, int height, HWND hWnd);
 	HWND InputBoxMulti(int posx, int posy, int width, int height, HWND hWnd);
 	HWND ComboBox(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst);
+	HWND ComboBoxID(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU id, HINSTANCE hInst);
 	HWND Button(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);
 	HWND ButtonDef(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);
 	HWND ButtonRadio(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);

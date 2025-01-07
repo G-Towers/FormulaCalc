@@ -99,6 +99,17 @@ HWND Widget::ComboBox(int posx, int posy, int width, int height, const char* tex
 	return CmbBx_hWnd;
 }
 
+HWND Widget::ComboBoxID(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU id, HINSTANCE hInst)
+{
+	HWND CmbBx_hWnd = CreateWindow(
+		"COMBOBOX",
+		text,
+		CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_VISIBLE,
+		posx, posy, width, height, hWnd, id, hInst, nullptr);
+
+	return CmbBx_hWnd;
+}
+
 HWND Widget::Button(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option)
 {
 	HWND Btn_hWnd = CreateWindow(
