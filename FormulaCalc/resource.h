@@ -49,6 +49,8 @@
 
 #define COMPINT_COMBOBOX_CALC				40042
 #define COMPINT_COMBOBOX_COMPOUND			40043
+#define COMPINT_CALC_RATE_BUTTON			40044
+#define COMPINT_CALC_ACCRUED_BUTTON			40045
 
 // Next default values for new objects
 // 

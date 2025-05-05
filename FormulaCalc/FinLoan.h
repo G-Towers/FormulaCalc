@@ -109,7 +109,7 @@ private:
 	double rate;		// Annual rate.
 	double monthPay;	// Monthly payment.
 	int months;			// Number of monthly payments.
-	double result;
+	double result;		// Final result.
 
 	// Char arrays.
 	char amountText[100] = { "" };

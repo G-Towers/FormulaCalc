@@ -310,7 +310,9 @@ void FinLoan::ReInit()
     principal = 0.0;
     rate = 0.0;
     monthPay = 0.0;
+    monthRate = 0.0;
     months = 0;
+    result = 0.0;
 }
 
 int FinLoan::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
@@ -434,6 +436,8 @@ std::string FinLoan::ToString(double num)
 
 void FinLoan::FinLoanCalcThunk(FinLoan* obj, void(FinLoan::* calc)())
 {
+    ReInit();
+
     // Retrieve input box text.
     GetWindowText(hInAmount, amountText, 100 );
     GetWindowText(hInRate, rateText, 100);

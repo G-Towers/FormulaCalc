@@ -9,28 +9,33 @@ BOOL CompInt::compIntWndCreated = 0;
 
 CompInt::CompInt()
 {
-    finAmount = 0.0;
+    accAmount = 0.0;
     principal = 0.0;
     rate = 0.0;
-    ratePercent = 0.0;
+    annRate = 0.0;
     intAmount = 0.0;
     compNum = 0.0;
     time = 0.0;
 
     hLblPrincipal = nullptr;
+    hLblAccAmount = nullptr;
+    hLblIntAmount = nullptr;
     hLblAnnRate = nullptr;
-    hLblCompound = nullptr;
     hLblTime = nullptr;
+
+    hLblCompound = nullptr;
+    hLblCalculate = nullptr;
 
     hLblResult = nullptr;
     hInPrincipal = nullptr;
+    hInAccAmount = nullptr;
+    hInIntAmount = nullptr;
     hInAnnRate = nullptr;
-    hInCompound = nullptr;
     hInTime = nullptr;
 
     hRsltCompInt = nullptr;
 
-    hComboBoxSelItem = nullptr;
+    hComboBoxCalculate = nullptr;
     hComboBoxCompound = nullptr;
 
     hBtnCalc = nullptr;
@@ -61,10 +66,14 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             ClearCompIntText();
             break;
 
-        case COMPINT_CALC_AMOUNT_BUTTON:
+        case COMPINT_CALC_ACCRUED_BUTTON:
             //calc = &FinLoan::CalcFinLoanPayment;
-            //FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanPayment);
-            MessageBox(m_hWnd, "Calculate", "You Pressed", MB_OK);
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcAccruedPrinInt);
+            //MessageBox(m_hWnd, "Calculate", "You Pressed", MB_OK);
+            break;
+
+        case COMPINT_CALC_RATE_BUTTON:
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcRate);
             break;
 
         case COMPINT_CLOSE_BUTTON:
@@ -80,6 +89,7 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CREATE:
         CompIntInterface();
+        CompIntAccruedInterface();
         break;
     case WM_SETFOCUS:
         SetFocus(compIntObj.m_hWnd);
@@ -122,38 +132,6 @@ HINSTANCE CompInt::GetInstance() noexcept
     return compIntObj.hInst;
 }
 
-void CompInt::CompIntInterface()
-{
-    // ComboBoxes.
-    hComboBoxSelItem = Widget::ComboBoxID(25, 25, 265, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_CALC, hInst);
-    hComboBoxCompound = Widget::ComboBoxID(105, 160, 175, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
-    CompIntDlgList(m_hWnd, COMPINT_COMBOBOX_CALC);
-    CompoundDlgList(m_hWnd, COMPINT_COMBOBOX_COMPOUND);
-
-    // Labels
-    hLblPrincipal = Widget::RLabel(45, 85, 150, 30, "Principal $:", m_hWnd);
-    hLblAnnRate = Widget::RLabel(45, 125, 150, 30, "Annual Rate %:", m_hWnd);
-    hLblCompound = Widget::RLabel(-50, 165, 150, 30, "Compound:", m_hWnd);
-    hLblTime = Widget::RLabel(45, 205, 150, 30, "Time:", m_hWnd);
-
-    // Input boxes.
-    hInPrincipal = Widget::InputBox(200, 80, 80, 30, m_hWnd);
-    hInAnnRate = Widget::InputBox(200, 120, 80, 30, m_hWnd);
-    hInTime = Widget::InputBox(200, 200, 80, 30, m_hWnd);
-
-    // Result label and input box.
-    hLblResult = Widget::RLabel(15, 245, 150, 30, "Result:", m_hWnd);
-    hRsltCompInt = Widget::ResultBox(170, 240, 110, 30, m_hWnd);
-
-
-    // Buttons.
-    hBtnClear = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
-    hBtnClose = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
-
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_AMOUNT_BUTTON);
-
-}
-
 void CompInt::CompIntWnd()
 {
     if (compIntWndCreated)
@@ -167,12 +145,135 @@ void CompInt::CompIntWnd()
     }
 }
 
+void CompInt::CompIntInterface()
+{
+    // Lablels.
+    hLblCalculate = Widget::RLabel(-5, 25, 150, 30, "Calculate:", m_hWnd);
+    hLblCompound = Widget::RLabel(-5, 160, 150, 30, "Compound:", m_hWnd);
+
+    hLblResult = Widget::RLabel(-5, 245, 150, 30, "Result:", m_hWnd);
+
+    // ComboBoxes.
+    hComboBoxCalculate = Widget::ComboBoxID(150, 25, 265, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_CALC, hInst);
+    hComboBoxCompound = Widget::ComboBoxID(150, 160, 175, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
+    CompIntDlgList(m_hWnd, COMPINT_COMBOBOX_CALC);
+    CompoundDlgList(m_hWnd, COMPINT_COMBOBOX_COMPOUND);
+
+    // Result Box. 
+    hRsltCompInt = Widget::ResultBox(150, 240, 110, 30, m_hWnd);
+
+
+    // Buttons.
+    hBtnClear = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
+    hBtnClose = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
+
+
+}
+
+void CompInt::CompIntAccruedInterface()
+{
+    // Labels
+    hLblPrincipal = Widget::RLabel(-5, 85, 150, 30, "Principal $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+
+    // Input boxes.
+    hInPrincipal = Widget::InputBox(150, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+
+    // Buttons.
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_ACCRUED_BUTTON);
+
+}
+
+void CompInt::CompIntPrinAInterface()
+{
+    // Labels
+    hLblAccAmount = Widget::RLabel(-5, 85, 150, 30, "Principal + Interest $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+
+    // Input boxes.
+    hInAccAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+
+    // Buttons.
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+}
+
+void CompInt::CompIntPrinIInterface()
+{
+    // Labels
+    hLblIntAmount = Widget::RLabel(-5, 85, 150, 30, "Total Interest $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+
+    // Input boxes.
+    hInIntAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+
+    // Buttons.
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+}
+
+void CompInt::CompIntRateInterface()
+{
+    // Labels
+    hLblPrincipal = Widget::RLabel(-5, 85, 150, 30, "Principal $:", m_hWnd);
+    hLblAccAmount = Widget::RLabel(-5, 125, 150, 30, "Accrued Amount $:", m_hWnd);
+    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+
+    // Input boxes.
+    hInPrincipal = Widget::InputBox(150, 80, 80, 30, m_hWnd);
+    hInAccAmount = Widget::InputBox(150, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+
+    // Buttons.
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+
+}
+
+void CompInt::CompIntTimeInterface()
+{
+    // Labels
+    hLblAccAmount = Widget::RLabel(-5, 85, 150, 30, "Principal + Interest $:", m_hWnd);
+    hLblPrincipal = Widget::RLabel(-5, 125, 150, 30, "Principal $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(-5, 205, 150, 30, "Annual Rate %:", m_hWnd);
+
+    // Input boxes.
+    hInAccAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
+    hInPrincipal = Widget::InputBox(150, 120, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+
+    // Buttons.
+    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+}
+
+void CompInt::ClearCompIntWnd()
+{
+    DestroyWindow(hLblPrincipal);
+    DestroyWindow(hLblAccAmount);
+    DestroyWindow(hLblAnnRate);
+    DestroyWindow(hLblTime);
+    //DestroyWindow(hLblResult);
+    DestroyWindow(hInPrincipal);
+    DestroyWindow(hInAccAmount);
+    DestroyWindow(hInAnnRate);
+    DestroyWindow(hInTime);
+    //DestroyWindow(hRsltCompInt);
+    DestroyWindow(hBtnCalc);
+}
+
+
 void CompInt::CompIntDlgList(HWND hWnd, int id)
 {
     // Add items to the combo box (NULL for ID).
-    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Total P + I"));
-    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Principal Using A"));
-    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Principal Using I"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Total Principal + Interest"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Principal Using Accrued"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Principal Using Interest"));
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Rate"));
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Time"));
 
@@ -206,19 +307,34 @@ void CompInt::CalcCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
         switch (selectedIndex)
         {
         case 0:
-            MessageBox(hWnd, "Total P + I", nullptr, MB_OK);
+            //MessageBox(hWnd, "Total P + I", nullptr, MB_OK);
+            ClearCompIntWnd();
+            ClearCompIntText();
+            CompIntAccruedInterface();
             break;
         case 1:
-            MessageBox(hWnd, "Principal Using A", nullptr, MB_OK);
+            //MessageBox(hWnd, "Principal Using A", nullptr, MB_OK);
+            ClearCompIntWnd();
+            ClearCompIntText();
+            CompIntPrinAInterface();
             break;
         case 2:
-            MessageBox(hWnd, "Principal Using I", nullptr, MB_OK);
+            //MessageBox(hWnd, "Principal Using I", nullptr, MB_OK);
+            ClearCompIntWnd();
+            ClearCompIntText();
+            CompIntPrinIInterface();
             break;
         case 3:
-            MessageBox(hWnd, "Rate", nullptr, MB_OK);
+            //MessageBox(hWnd, "Rate", nullptr, MB_OK);
+            ClearCompIntWnd();
+            ClearCompIntText();
+            CompIntRateInterface();
             break;
         case 4:
-            MessageBox(hWnd, "Time", nullptr, MB_OK);
+            //MessageBox(hWnd, "Time", nullptr, MB_OK);
+            ClearCompIntWnd();
+            ClearCompIntText();
+            CompIntTimeInterface();
             break;
         }
     }
@@ -238,19 +354,23 @@ void CompInt::CompoundCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
         switch (selectedIndex)
         {
         case 0:
-            MessageBox(hWnd, "Continuous", nullptr, MB_OK);
+            //MessageBox(hWnd, "Continuous", nullptr, MB_OK);
             break;
         case 1:
-            MessageBox(hWnd, "Daily", nullptr, MB_OK);
+            //MessageBox(hWnd, "Daily", nullptr, MB_OK);
+            compNum = 365;
             break;
         case 2:
             MessageBox(hWnd, "Weekly", nullptr, MB_OK);
+            compNum = 52;
             break;
         case 3:
             MessageBox(hWnd, "Biweekly", nullptr, MB_OK);
+            compNum = 26;
             break;
         case 4:
-            MessageBox(hWnd, "Monthly", nullptr, MB_OK);
+            //MessageBox(hWnd, "Monthly", nullptr, MB_OK);
+            compNum = 12;
             break;
         }
     }
@@ -261,15 +381,21 @@ void CompInt::ClearCompIntText()
     const char* emptyText = "";
 
     SetWindowText(hInPrincipal, emptyText);
+    SetWindowText(hInAccAmount, emptyText);
     SetWindowText(hInAnnRate, emptyText);
-    SetWindowText(hInCompound, emptyText);
     SetWindowText(hInTime, emptyText);
     SetWindowText(hRsltCompInt, emptyText);
 }
 
 void CompInt::ReInit()
 {
-
+    accAmount = 0.0;
+    principal = 0.0;
+    rate = 0.0;
+    annRate = 0.0;
+    intAmount = 0.0;
+    //compNum = 0.0;
+    time = 0.0;
 }
 
 int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
@@ -286,10 +412,13 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
     // Map message strings to input boxes.
     HandleToString(hInPrincipal, "Principal is not a valid number!\nPlease enter Principal as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
-    HandleToString(hInCompound, "Monthly Payment is not a valid number!\nPlease enter Monthly Payment as a valid number."
+
+    HandleToString(hInAccAmount, "Accrued Amount is not a valid number!\nPlease enter the amount as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
+
     HandleToString(hInAnnRate, "Annual Interest Rate is not a valid number!\nPlease enter Annual Interest Rate as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
+
     HandleToString(hInTime, "Time is not a valid number!\nPlease enter Time as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
 
@@ -394,7 +523,7 @@ std::string CompInt::ToString(double num)
     // Set the decimal point.
     ss.setf(std::ios::fixed);
     ss.setf(std::ios::showpoint);
-    ss.precision(2);
+    ss.precision(3);
 
     ss << num;
 
@@ -403,17 +532,13 @@ std::string CompInt::ToString(double num)
 
 void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
 {
-    // Retrieve input box text.
-    GetWindowText(hInPrincipal, amountText, 100);
-    GetWindowText(hInAnnRate, rateText, 100);
-    GetWindowText(hInCompound, monthsText, 100);
-    GetWindowText(hInTime, monthPayText, 100);
+    ReInit();
 
-    // Convert  to double.
-    principal = strtod(amountText, nullptr);
-    rate = strtod(rateText, nullptr);
-    compNum = (int)strtod(monthsText, nullptr);
-    //monthPay = strtod(monthPayText, nullptr);
+    // Retrieve input box text.
+    GetWindowText(hInPrincipal, principalText, 100);
+    GetWindowText(hInAccAmount, accAmountText, 100);
+    GetWindowText(hInAnnRate, annRateText, 100);
+    GetWindowText(hInTime, timeText, 100);
 
     // Calculate.
     (obj->*calc)();
@@ -425,14 +550,87 @@ void CompInt::CalcCompoundInt()
 
     if (inOk)
     {
-        double intRate = rate * 0.01 / 12;
-        finAmount = principal * (pow((1 + intRate), compNum * time));
+        // Convert  to double.
+        principal = strtod(accAmountText, nullptr);
+        accAmount = strtod(principalText, nullptr);
+        rate = strtod(rateText, nullptr);
+        time = strtod(timeText, nullptr);
+
+        double intRate = rate * 0.01 / 12;  // Convert to decimal and get monthly rate.
+        accAmount = principal * (pow((1 + intRate), compNum * time));
 
         // Display.
-        std::string resultString = ToString(finAmount); // Get the string.
+        std::string resultString = ToString(accAmount); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
 
     }
+}
+
+void CompInt::CalcAccruedPrinInt()
+{
+    int inOk = UserIn(hInPrincipal, hInAnnRate, hInTime);
+
+    if (inOk)
+    {
+        // Convert  to double.
+        principal = strtod(principalText, nullptr);
+        annRate = strtod(annRateText, nullptr);
+        time = strtod(timeText, nullptr);
+
+        rate = annRate / 100;
+        accAmount = principal * (pow((1 + (rate / compNum)), (compNum * time)));
+
+        // Display.
+        std::string resultString = ToString(accAmount); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
+}
+
+void CompInt::CalcPrinAccrued()
+{
+
+}
+
+void CompInt::CalcPrinInt()
+{
+
+}
+
+void CompInt::CalcRate()
+{
+    int inOk = UserIn(hInPrincipal, hInAccAmount, hInTime);
+
+    if (inOk)
+    {
+        // Convert  to double.
+        principal = strtod(principalText, nullptr);
+        accAmount = strtod(accAmountText, nullptr);
+        time = strtod(timeText, nullptr);
+
+        // Calculate
+        rate = compNum * (pow((accAmount / principal), 1 / (compNum * time)) - 1);
+        annRate = rate * 100.0;
+
+        // Display.
+        std::string resultString = ToString(annRate) + " %"; // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
+}
+
+void CompInt::CalcRatePercent()
+{
+
+}
+
+void CompInt::CalcTime()
+{
+
 }
