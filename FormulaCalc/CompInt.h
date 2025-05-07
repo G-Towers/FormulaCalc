@@ -198,6 +198,9 @@ private:
 	char charArrC[100] = { "" };
 	char charArrD[100] = { "" };
 
+	// Groups.
+	HWND hGrpInfo;
+
 	// Radio Buttons.
 
 	// Labels.

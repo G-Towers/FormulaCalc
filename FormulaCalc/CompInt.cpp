@@ -17,6 +17,8 @@ CompInt::CompInt()
     compNum = 0.0;
     time = 0.0;
 
+    hGrpInfo = nullptr;
+
     hLblPrincipal = nullptr;
     hLblAccAmount = nullptr;
     hLblIntAmount = nullptr;
@@ -139,7 +141,7 @@ void CompInt::CompIntWnd()
     else
     {
         CreateWnd("Compound Interest", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
-            0, 270, 270, 480, 350, GetParent(m_hWnd));
+            0, 270, 270, 560, 350, GetParent(m_hWnd));
         ShowWindow(m_hWnd, SW_SHOW);
         compIntWndCreated = 1;
     }
@@ -148,24 +150,27 @@ void CompInt::CompIntWnd()
 void CompInt::CompIntInterface()
 {
     // Lablels.
-    hLblCalculate = Widget::RLabel(-5, 25, 150, 30, "Calculate:", m_hWnd);
-    hLblCompound = Widget::RLabel(-5, 160, 150, 30, "Compound:", m_hWnd);
+    hLblCalculate = Widget::RLabel(75, 17, 100, 30, "Calculate:", m_hWnd);
+    hLblCompound = Widget::RLabel(75, 160, 100, 30, "Compound:", m_hWnd);
 
-    hLblResult = Widget::RLabel(-5, 245, 150, 30, "Result:", m_hWnd);
+    hLblResult = Widget::RLabel(75, 245, 100, 30, "Result:", m_hWnd);
 
     // ComboBoxes.
-    hComboBoxCalculate = Widget::ComboBoxID(150, 25, 265, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_CALC, hInst);
-    hComboBoxCompound = Widget::ComboBoxID(150, 160, 175, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
+    hComboBoxCalculate = Widget::ComboBoxID(20, 15, 265, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_CALC, hInst);
+    hComboBoxCompound = Widget::ComboBoxID(180, 160, 175, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
     CompIntDlgList(m_hWnd, COMPINT_COMBOBOX_CALC);
     CompoundDlgList(m_hWnd, COMPINT_COMBOBOX_COMPOUND);
 
+    // Groupbox.
+    hGrpInfo = Widget::GroupBox(20, 50, 390, 240, "Enter Information", m_hWnd, hInst);
+
     // Result Box. 
-    hRsltCompInt = Widget::ResultBox(150, 240, 110, 30, m_hWnd);
+    hRsltCompInt = Widget::ResultBox(180, 240, 110, 30, m_hWnd);
 
 
     // Buttons.
-    hBtnClear = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
-    hBtnClose = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
+    hBtnClear = Widget::Button(430, 210, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
+    hBtnClose = Widget::Button(430, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
 
 
 }
@@ -173,83 +178,83 @@ void CompInt::CompIntInterface()
 void CompInt::CompIntAccruedInterface()
 {
     // Labels
-    hLblPrincipal = Widget::RLabel(-5, 85, 150, 30, "Principal $:", m_hWnd);
-    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
-    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+    hLblPrincipal = Widget::RLabel(75, 85, 100, 30, "Principal $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(75, 125, 100, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(75, 205, 100, 30, "Time (in years):", m_hWnd);
 
     // Input boxes.
-    hInPrincipal = Widget::InputBox(150, 80, 80, 30, m_hWnd);
-    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
-    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+    hInPrincipal = Widget::InputBox(180, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(180, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_ACCRUED_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_ACCRUED_BUTTON);
 
 }
 
 void CompInt::CompIntPrinAInterface()
 {
     // Labels
-    hLblAccAmount = Widget::RLabel(-5, 85, 150, 30, "Principal + Interest $:", m_hWnd);
-    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
-    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+    hLblAccAmount = Widget::RLabel(50, 85, 125, 30, "Principal + Interest $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(75, 125, 100, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(75, 205, 100, 30, "Time (in years):", m_hWnd);
 
     // Input boxes.
-    hInAccAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
-    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
-    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+    hInAccAmount = Widget::InputBox(180, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(180, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
 }
 
 void CompInt::CompIntPrinIInterface()
 {
     // Labels
-    hLblIntAmount = Widget::RLabel(-5, 85, 150, 30, "Total Interest $:", m_hWnd);
-    hLblAnnRate = Widget::RLabel(-5, 125, 150, 30, "Annual Rate %:", m_hWnd);
-    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+    hLblIntAmount = Widget::RLabel(75, 85, 100, 30, "Total Interest $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(75, 125, 100, 30, "Annual Rate %:", m_hWnd);
+    hLblTime = Widget::RLabel(75, 205, 100, 30, "Time (in years):", m_hWnd);
 
     // Input boxes.
-    hInIntAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
-    hInAnnRate = Widget::InputBox(150, 120, 80, 30, m_hWnd);
-    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+    hInIntAmount = Widget::InputBox(180, 80, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(180, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
 }
 
 void CompInt::CompIntRateInterface()
 {
     // Labels
-    hLblPrincipal = Widget::RLabel(-5, 85, 150, 30, "Principal $:", m_hWnd);
-    hLblAccAmount = Widget::RLabel(-5, 125, 150, 30, "Accrued Amount $:", m_hWnd);
-    hLblTime = Widget::RLabel(-5, 205, 150, 30, "Time (in years):", m_hWnd);
+    hLblPrincipal = Widget::RLabel(75, 85, 100, 30, "Principal $:", m_hWnd);
+    hLblAccAmount = Widget::RLabel(55, 125, 120, 30, "Accrued Amount $:", m_hWnd);
+    hLblTime = Widget::RLabel(75, 205, 100, 30, "Time (in years):", m_hWnd);
 
     // Input boxes.
-    hInPrincipal = Widget::InputBox(150, 80, 80, 30, m_hWnd);
-    hInAccAmount = Widget::InputBox(150, 120, 80, 30, m_hWnd);
-    hInTime = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+    hInPrincipal = Widget::InputBox(180, 80, 80, 30, m_hWnd);
+    hInAccAmount = Widget::InputBox(180, 120, 80, 30, m_hWnd);
+    hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
 
 }
 
 void CompInt::CompIntTimeInterface()
 {
     // Labels
-    hLblAccAmount = Widget::RLabel(-5, 85, 150, 30, "Principal + Interest $:", m_hWnd);
-    hLblPrincipal = Widget::RLabel(-5, 125, 150, 30, "Principal $:", m_hWnd);
-    hLblAnnRate = Widget::RLabel(-5, 205, 150, 30, "Annual Rate %:", m_hWnd);
+    hLblAccAmount = Widget::RLabel(50, 85, 125, 30, "Principal + Interest $:", m_hWnd);
+    hLblPrincipal = Widget::RLabel(75, 125, 100, 30, "Principal $:", m_hWnd);
+    hLblAnnRate = Widget::RLabel(75, 205, 100, 30, "Annual Rate %:", m_hWnd);
 
     // Input boxes.
-    hInAccAmount = Widget::InputBox(150, 80, 80, 30, m_hWnd);
-    hInPrincipal = Widget::InputBox(150, 120, 80, 30, m_hWnd);
-    hInAnnRate = Widget::InputBox(150, 200, 80, 30, m_hWnd);
+    hInAccAmount = Widget::InputBox(180, 80, 80, 30, m_hWnd);
+    hInPrincipal = Widget::InputBox(180, 120, 80, 30, m_hWnd);
+    hInAnnRate = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
 }
 
 void CompInt::ClearCompIntWnd()
