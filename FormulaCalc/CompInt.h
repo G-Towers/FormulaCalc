@@ -105,15 +105,15 @@ public:
 	void CalcCompoundInt();
 	// Initial test calculation.
 
-	void CalcAccruedPrinInt();
+	void CalcAccrued();
 	// Calculate accrued amount, Pricipal + Interest.
 	// A = P(1 + r/n)^nt.
 
-	void CalcPrinAccrued();
+	void CalcPrincAccrued();
 	// Calculate principal amount, solve for P in terms of A.
 	// P = A / (1 + r/n)^nt.
 
-	void CalcPrinInt();
+	void CalcPrincInt();
 	// Calculate principal amount, solve for P in terms of I.
 	// P = I / ((1 + r/n)^nt - 1).
 
@@ -122,7 +122,7 @@ public:
 	// r = n((A/P)^1/nt - 1).
 
 	void CalcRatePercent();
-	// Calculate compund interest rate as a percent.
+	// Calculate compound interest rate as a percent.
 	// R = r * 100. (Convert r to a percent).
 
 	void CalcTime();
@@ -156,7 +156,8 @@ public:
 
 	void CalcContTime();
 	// Calculate time, solve for t.
-	// t = ln(A/P) / r
+	// t = ln(A/P) / n * (ln(1 + r/n)), then also
+	// t = ln(A) - ln(P) / n * (ln(1 + r/n)).
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL compIntWndCreated;	// Flag for window created.
@@ -187,6 +188,7 @@ private:
 	// Char arrays.
 	char principalText[100] = { "" };
 	char accAmountText[100] = { "" };
+	char intAmountText[100] = { "" };
 	char annRateText[100] = { "" };
 	char rateText[100] = { "" };
 	char timeText[100] = { "" };

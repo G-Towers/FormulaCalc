@@ -69,13 +69,23 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case COMPINT_CALC_ACCRUED_BUTTON:
-            //calc = &FinLoan::CalcFinLoanPayment;
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcAccruedPrinInt);
-            //MessageBox(m_hWnd, "Calculate", "You Pressed", MB_OK);
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcAccrued);
+            break;
+
+        case COMPINT_PRINCA_BUTTON:
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincAccrued);
+            break;
+
+        case COMPINT_PRINCI_BUTTON:
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincInt);
             break;
 
         case COMPINT_CALC_RATE_BUTTON:
             CompIntCalcThunk(&compIntObj, &CompInt::CalcRate);
+            break;
+
+        case COMPINT_TIME_BUTTON:
+            CompIntCalcThunk(&compIntObj, &CompInt::CalcTime);
             break;
 
         case COMPINT_CLOSE_BUTTON:
@@ -205,7 +215,7 @@ void CompInt::CompIntPrinAInterface()
     hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCA_BUTTON);
 }
 
 void CompInt::CompIntPrinIInterface()
@@ -221,7 +231,7 @@ void CompInt::CompIntPrinIInterface()
     hInTime = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCI_BUTTON);
 }
 
 void CompInt::CompIntRateInterface()
@@ -254,18 +264,20 @@ void CompInt::CompIntTimeInterface()
     hInAnnRate = Widget::InputBox(180, 200, 80, 30, m_hWnd);
 
     // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_TIME_BUTTON);
 }
 
 void CompInt::ClearCompIntWnd()
 {
     DestroyWindow(hLblPrincipal);
     DestroyWindow(hLblAccAmount);
+    DestroyWindow(hLblIntAmount);
     DestroyWindow(hLblAnnRate);
     DestroyWindow(hLblTime);
     //DestroyWindow(hLblResult);
     DestroyWindow(hInPrincipal);
     DestroyWindow(hInAccAmount);
+    DestroyWindow(hInIntAmount);
     DestroyWindow(hInAnnRate);
     DestroyWindow(hInTime);
     //DestroyWindow(hRsltCompInt);
@@ -387,6 +399,7 @@ void CompInt::ClearCompIntText()
 
     SetWindowText(hInPrincipal, emptyText);
     SetWindowText(hInAccAmount, emptyText);
+    SetWindowText(hInIntAmount, emptyText);
     SetWindowText(hInAnnRate, emptyText);
     SetWindowText(hInTime, emptyText);
     SetWindowText(hRsltCompInt, emptyText);
@@ -419,6 +432,9 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
         "\nSee -- Help \\ Info-- for more information.");
 
     HandleToString(hInAccAmount, "Accrued Amount is not a valid number!\nPlease enter the amount as a valid number."
+        "\nSee -- Help \\ Info-- for more information.");
+
+    HandleToString(hInIntAmount, "Interest Amount is not a valid number!\nPlease enter the amount as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
 
     HandleToString(hInAnnRate, "Annual Interest Rate is not a valid number!\nPlease enter Annual Interest Rate as a valid number."
@@ -542,6 +558,7 @@ void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
     // Retrieve input box text.
     GetWindowText(hInPrincipal, principalText, 100);
     GetWindowText(hInAccAmount, accAmountText, 100);
+    GetWindowText(hInIntAmount, intAmountText, 100);
     GetWindowText(hInAnnRate, annRateText, 100);
     GetWindowText(hInTime, timeText, 100);
 
@@ -573,7 +590,7 @@ void CompInt::CalcCompoundInt()
     }
 }
 
-void CompInt::CalcAccruedPrinInt()
+void CompInt::CalcAccrued()
 {
     int inOk = UserIn(hInPrincipal, hInAnnRate, hInTime);
 
@@ -588,7 +605,7 @@ void CompInt::CalcAccruedPrinInt()
         accAmount = principal * (pow((1 + (rate / compNum)), (compNum * time)));
 
         // Display.
-        std::string resultString = ToString(accAmount); // Get the string.
+        std::string resultString = "$ " + ToString(accAmount); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -596,14 +613,54 @@ void CompInt::CalcAccruedPrinInt()
     }
 }
 
-void CompInt::CalcPrinAccrued()
+void CompInt::CalcPrincAccrued()
 {
+    int inOk = UserIn(hInAccAmount, hInAnnRate, hInTime);
 
+    if (inOk)
+    {
+        // Convert  to double.
+        accAmount = strtod(accAmountText, nullptr);
+        annRate = strtod(annRateText, nullptr);
+        time = strtod(timeText, nullptr);
+
+        // Calculate
+        rate = annRate / 100.0;
+        principal = accAmount / (pow((1 + rate / compNum), (compNum * time)));
+        
+
+        // Display.
+        std::string resultString = "$ " + ToString(principal); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
 }
 
-void CompInt::CalcPrinInt()
+void CompInt::CalcPrincInt()
 {
+    int inOk = UserIn(hInIntAmount, hInAnnRate, hInTime);
 
+    if (inOk)
+    {
+        // Convert  to double.
+        intAmount = strtod(intAmountText, nullptr);
+        annRate = strtod(annRateText, nullptr);
+        time = strtod(timeText, nullptr);
+
+        // Calculate
+        rate = annRate / 100.0;
+        principal = intAmount / (pow((1 + rate / compNum), (compNum * time) - 1));
+
+
+        // Display.
+        std::string resultString = "$ " + ToString(principal); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
 }
 
 void CompInt::CalcRate()
@@ -637,5 +694,25 @@ void CompInt::CalcRatePercent()
 
 void CompInt::CalcTime()
 {
+    int inOk = UserIn(hInAccAmount, hInPrincipal, hInAnnRate);
 
+    if (inOk)
+    {
+        // Convert  to double.
+        accAmount = strtod(accAmountText, nullptr);
+        principal = strtod(principalText, nullptr);
+        annRate = strtod(annRateText, nullptr);
+
+        // Calculate
+        rate = annRate / 100.0;
+        double time = log(accAmount / principal) / (compNum * (log(1 + (rate / compNum))));
+
+
+        // Display.
+        std::string resultString = ToString(time) + " years."; // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
 }
