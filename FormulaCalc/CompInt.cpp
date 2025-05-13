@@ -167,7 +167,7 @@ void CompInt::CompIntInterface()
 
     // ComboBoxes.
     hComboBoxCalculate = Widget::ComboBoxID(20, 15, 265, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_CALC, hInst);
-    hComboBoxCompound = Widget::ComboBoxID(180, 160, 175, 150, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
+    hComboBoxCompound = Widget::ComboBoxID(180, 160, 175, 200, "", m_hWnd, (HMENU)COMPINT_COMBOBOX_COMPOUND, hInst);
     CompIntDlgList(m_hWnd, COMPINT_COMBOBOX_CALC);
     CompoundDlgList(m_hWnd, COMPINT_COMBOBOX_COMPOUND);
 
@@ -305,7 +305,12 @@ void CompInt::CompoundDlgList(HWND hWnd, int id)
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Daily"));
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Weekly"));
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Biweekly"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Semimonthly"));
     SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Monthly"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Bimonthly"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Quarterly"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Semiannually"));
+    SendDlgItemMessage(hWnd, id, CB_ADDSTRING, 0, (LPARAM)TEXT("Annually"));
 
     // Set the initial selection
     SendDlgItemMessage(hWnd, id, CB_SETCURSEL, 0, 0);
@@ -372,22 +377,43 @@ void CompInt::CompoundCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
         {
         case 0:
             //MessageBox(hWnd, "Continuous", nullptr, MB_OK);
+			compNum = 0;	// Continuous.
             break;
         case 1:
-            //MessageBox(hWnd, "Daily", nullptr, MB_OK);
+            // Daily.
             compNum = 365;
             break;
         case 2:
-            MessageBox(hWnd, "Weekly", nullptr, MB_OK);
+            // Weekly.
             compNum = 52;
             break;
         case 3:
-            MessageBox(hWnd, "Biweekly", nullptr, MB_OK);
+            // Biweekly.
             compNum = 26;
             break;
         case 4:
-            //MessageBox(hWnd, "Monthly", nullptr, MB_OK);
-            compNum = 12;
+            // Semimonthly.
+			compNum = 24;	// 2 times a month.
+            break;
+        case 5:
+            // Monthly.
+			compNum = 12;	// 12 times a year.
+            break;
+        case 6:
+			// Bimonthly.
+			compNum = 6;	// 6 times a year.
+            break;
+        case 7:
+			// Quarterly.
+			compNum = 4;	// 4 times a year.
+            break;
+        case 8:
+			// Semiannually.
+			compNum = 2;	// 2 times a year.
+            break;
+        case 9:
+			// Annually.
+			compNum = 1;	// 1 time a year.
             break;
         }
     }
@@ -544,7 +570,7 @@ std::string CompInt::ToString(double num)
     // Set the decimal point.
     ss.setf(std::ios::fixed);
     ss.setf(std::ios::showpoint);
-    ss.precision(3);
+    ss.precision(2);
 
     ss << num;
 
