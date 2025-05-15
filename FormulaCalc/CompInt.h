@@ -134,15 +134,15 @@ public:
 	// To be used with calculate functions above (when n = infinity).
 
 
-	void CalcContIntPlusAccrued();
+	void CalcContAccruedPrincPlusInt();
 	// Calculate Accrued amount, principal + interest.
 	// A = Pe^rt.
 
-	void CalcContPrinAccrued();
+	void CalcContPrincAccrued();
 	// Calculate pricipal amount, solve for P in terms of A.
 	// P = A / e^rt.
 
-	void CalcContPrinInt();
+	void CalcContPrincInt();
 	// Calculate pricipal amount, solve for P in terms of I.
 	// P = I / (e^rt - 1).
 
@@ -150,14 +150,9 @@ public:
 	// Calculate compound interest rate as a decimal.
 	// r = ln(A/P) / t.
 
-	void CalcContRatePercent();
-	// Calculate compound interest rate as a percent.
-	// R = r * 100.
-
 	void CalcContTime();
 	// Calculate time, solve for t.
-	// t = ln(A/P) / n * (ln(1 + r/n)), then also
-	// t = ln(A) - ln(P) / n * (ln(1 + r/n)).
+	// t = ln(A/P) / r.	
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL compIntWndCreated;	// Flag for window created.
@@ -186,19 +181,19 @@ private:
 	double result;		// Final result.
 
 	// Char arrays.
-	char principalText[100] = { "" };
-	char accAmountText[100] = { "" };
-	char intAmountText[100] = { "" };
-	char annRateText[100] = { "" };
-	char rateText[100] = { "" };
-	char timeText[100] = { "" };
+	char principalText[100];
+	char accAmountText[100];
+	char intAmountText[100];
+	char annRateText[100];
+	char rateText[100];
+	char timeText[100];
 
-	char resultText[100] = { "" };
+	char resultText[100];
 
-	char charArrA[100] = { "" };
-	char charArrB[100] = { "" };
-	char charArrC[100] = { "" };
-	char charArrD[100] = { "" };
+	char charArrA[100];
+	char charArrB[100];
+	char charArrC[100];
+	char charArrD[100];
 
 	// Groups.
 	HWND hGrpInfo;

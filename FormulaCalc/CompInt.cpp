@@ -9,6 +9,9 @@ BOOL CompInt::compIntWndCreated = 0;
 
 CompInt::CompInt()
 {
+	hInst = nullptr;
+    calc = nullptr;
+
     accAmount = 0.0;
     principal = 0.0;
     rate = 0.0;
@@ -16,6 +19,21 @@ CompInt::CompInt()
     intAmount = 0.0;
     compNum = 0.0;
     time = 0.0;
+
+	result = 0.0;
+
+    // Initialize char arrays to empty strings
+    std::memset(principalText, '\0', sizeof(principalText));
+    std::memset(accAmountText, '\0', sizeof(accAmountText));
+    std::memset(intAmountText, '\0', sizeof(intAmountText));
+    std::memset(annRateText, '\0', sizeof(annRateText));
+    std::memset(rateText, '\0', sizeof(rateText));
+    std::memset(timeText, '\0', sizeof(timeText));
+    std::memset(resultText, '\0', sizeof(resultText));
+    std::memset(charArrA, '\0', sizeof(charArrA));
+    std::memset(charArrB, '\0', sizeof(charArrB));
+    std::memset(charArrC, '\0', sizeof(charArrC));
+    std::memset(charArrD, '\0', sizeof(charArrD));
 
     hGrpInfo = nullptr;
 
@@ -69,23 +87,28 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case COMPINT_CALC_ACCRUED_BUTTON:
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcAccrued);
+            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcAccrued) :
+			    CompIntCalcThunk(&compIntObj, &CompInt::CalcContAccruedPrincPlusInt);
             break;
 
         case COMPINT_PRINCA_BUTTON:
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincAccrued);
+            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincAccrued) :
+                CompIntCalcThunk(&compIntObj, &CompInt::CalcContPrincAccrued);
             break;
 
         case COMPINT_PRINCI_BUTTON:
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincInt);
+            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincInt) :
+                CompIntCalcThunk(&compIntObj, &CompInt::CalcContPrincInt);
             break;
 
         case COMPINT_CALC_RATE_BUTTON:
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcRate);
+            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcRate) :
+                CompIntCalcThunk(&compIntObj, &CompInt::CalcContRate);
             break;
 
         case COMPINT_TIME_BUTTON:
-            CompIntCalcThunk(&compIntObj, &CompInt::CalcTime);
+            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcTime) :
+                CompIntCalcThunk(&compIntObj, &CompInt::CalcContTime);
             break;
 
         case COMPINT_CLOSE_BUTTON:
@@ -433,6 +456,7 @@ void CompInt::ClearCompIntText()
 
 void CompInt::ReInit()
 {
+	// Initialize variables to default values.
     accAmount = 0.0;
     principal = 0.0;
     rate = 0.0;
@@ -440,6 +464,19 @@ void CompInt::ReInit()
     intAmount = 0.0;
     //compNum = 0.0;
     time = 0.0;
+
+    // Initialize char arrays to empty strings
+    std::memset(principalText, '\0', sizeof(principalText));
+    std::memset(accAmountText, '\0', sizeof(accAmountText));
+    std::memset(intAmountText, '\0', sizeof(intAmountText));
+    std::memset(annRateText, '\0', sizeof(annRateText));
+    std::memset(rateText, '\0', sizeof(rateText));
+    std::memset(timeText, '\0', sizeof(timeText));
+    std::memset(resultText, '\0', sizeof(resultText));
+    std::memset(charArrA, '\0', sizeof(charArrA));
+    std::memset(charArrB, '\0', sizeof(charArrB));
+    std::memset(charArrC, '\0', sizeof(charArrC));
+    std::memset(charArrD, '\0', sizeof(charArrD));
 }
 
 int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
@@ -588,6 +625,13 @@ void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
     GetWindowText(hInAnnRate, annRateText, 100);
     GetWindowText(hInTime, timeText, 100);
 
+    // Convert  to double.
+    principal = strtod(principalText, nullptr);
+    accAmount = strtod(accAmountText, nullptr);
+    intAmount = strtod(intAmountText, nullptr);
+    annRate = strtod(annRateText, nullptr);
+    time = strtod(timeText, nullptr);
+
     // Calculate.
     (obj->*calc)();
 }
@@ -597,13 +641,7 @@ void CompInt::CalcCompoundInt()
     int inOk = UserIn(hInPrincipal, hInAnnRate, hInTime);
 
     if (inOk)
-    {
-        // Convert  to double.
-        principal = strtod(accAmountText, nullptr);
-        accAmount = strtod(principalText, nullptr);
-        rate = strtod(rateText, nullptr);
-        time = strtod(timeText, nullptr);
-
+    {    
         double intRate = rate * 0.01 / 12;  // Convert to decimal and get monthly rate.
         accAmount = principal * (pow((1 + intRate), compNum * time));
 
@@ -622,11 +660,6 @@ void CompInt::CalcAccrued()
 
     if (inOk)
     {
-        // Convert  to double.
-        principal = strtod(principalText, nullptr);
-        annRate = strtod(annRateText, nullptr);
-        time = strtod(timeText, nullptr);
-
         rate = annRate / 100;
         accAmount = principal * (pow((1 + (rate / compNum)), (compNum * time)));
 
@@ -645,11 +678,6 @@ void CompInt::CalcPrincAccrued()
 
     if (inOk)
     {
-        // Convert  to double.
-        accAmount = strtod(accAmountText, nullptr);
-        annRate = strtod(annRateText, nullptr);
-        time = strtod(timeText, nullptr);
-
         // Calculate
         rate = annRate / 100.0;
         principal = accAmount / (pow((1 + rate / compNum), (compNum * time)));
@@ -670,11 +698,6 @@ void CompInt::CalcPrincInt()
 
     if (inOk)
     {
-        // Convert  to double.
-        intAmount = strtod(intAmountText, nullptr);
-        annRate = strtod(annRateText, nullptr);
-        time = strtod(timeText, nullptr);
-
         // Calculate
         rate = annRate / 100.0;
         principal = intAmount / (pow((1 + rate / compNum), (compNum * time) - 1));
@@ -695,14 +718,9 @@ void CompInt::CalcRate()
 
     if (inOk)
     {
-        // Convert  to double.
-        principal = strtod(principalText, nullptr);
-        accAmount = strtod(accAmountText, nullptr);
-        time = strtod(timeText, nullptr);
-
         // Calculate
         rate = compNum * (pow((accAmount / principal), 1 / (compNum * time)) - 1);
-        annRate = rate * 100.0;
+		annRate = rate * 100.0; // Convert to percentage.
 
         // Display.
         std::string resultString = ToString(annRate) + " %"; // Get the string.
@@ -724,11 +742,6 @@ void CompInt::CalcTime()
 
     if (inOk)
     {
-        // Convert  to double.
-        accAmount = strtod(accAmountText, nullptr);
-        principal = strtod(principalText, nullptr);
-        annRate = strtod(annRateText, nullptr);
-
         // Calculate
         rate = annRate / 100.0;
         double time = log(accAmount / principal) / (compNum * (log(1 + (rate / compNum))));
@@ -741,4 +754,92 @@ void CompInt::CalcTime()
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
 
     }
+}
+
+void CompInt::CalcContAccruedPrincPlusInt()
+{
+    int inOk = UserIn(hInPrincipal, hInAnnRate, hInTime);
+
+    if (inOk)
+    {
+        // Calculate
+        rate = annRate / 100.0;
+        accAmount = principal * pow(e, (rate * time));
+
+        // Display.
+        std::string resultString = "$ " + ToString(accAmount); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+	}
+}
+
+void CompInt::CalcContPrincAccrued()
+{
+    int inOk = UserIn(hInAccAmount, hInAnnRate, hInTime);
+
+    if (inOk)
+    {
+        // Calculate
+        rate = annRate / 100.0;
+        principal = accAmount / pow(e, (rate * time));
+
+        // Display.
+        std::string resultString = "$ " + ToString(principal); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+    }
+}
+
+void CompInt::CalcContPrincInt()
+{
+    int inOk = UserIn(hInIntAmount, hInAnnRate, hInTime);
+
+    if (inOk)
+    {
+        // Calculate
+        rate = annRate / 100.0;
+        principal = intAmount / (pow(e, (rate * time)) - 1);
+
+        // Display.
+        std::string resultString = "$ " + ToString(principal); // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+    }
+}
+
+void CompInt::CalcContRate()
+{
+    int inOk = UserIn(hInPrincipal, hInAccAmount, hInTime);
+
+    if (inOk)
+    {
+        // Calculate
+        rate = log(accAmount / principal) / time;
+        annRate = rate * 100.0; // Convert to percentage.
+
+        // Display.
+        std::string resultString = ToString(annRate) + " %"; // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+
+    }
+}
+
+void CompInt::CalcContTime()
+{
+	int inOk = UserIn(hInAccAmount, hInPrincipal, hInAnnRate);
+
+    if (inOk)
+    {
+        // Calculate
+        rate = annRate / 100.0;
+        time = log(accAmount / principal) / rate;
+
+        // Display.
+        std::string resultString = ToString(time) + " years."; // Get the string.
+        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
+        SetWindowText(hRsltCompInt, resultText);	// Display the result.
+	}
+
 }
