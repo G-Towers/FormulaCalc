@@ -45,6 +45,9 @@ public:
 	void CompIntTimeInterface();
 	// Solve for time interface.
 
+	void HideAllInputControls();
+	// Hides all input controls.
+
 	void ClearCompIntWnd();
 	// Clears the window (removes the interface).
 
@@ -80,7 +83,6 @@ public:
 
 	std::string ToString(double num);
 	// Convert to string.
-
 
 	void CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)());
 	// Retrieves input, handles conversion and calls calculate functions using pointer.
@@ -131,7 +133,7 @@ public:
 	// t = (ln(A) - ln(P)) / n(ln(1 + r/n)).
 
 	// ------------------------- Continuous Compounding Functions --------------------------
-	// To be used with calculate functions above (when n = infinity).
+	// To be used when n = infinity.
 
 
 	void CalcContAccruedPrincPlusInt();
@@ -153,6 +155,13 @@ public:
 	void CalcContTime();
 	// Calculate time, solve for t.
 	// t = ln(A/P) / r.	
+
+	void SaveInputText();
+	// Saves input text from the interface.
+
+	void RestoreInputText();
+	// Restores input text to the interface.
+
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL compIntWndCreated;	// Flag for window created.
@@ -179,6 +188,16 @@ private:
 	double time;		// Time in years as a decimal, 6 Months = 0.5 years, Months / 12 = years (t).
 
 	double result;		// Final result.
+
+	// strings for saves.
+	std::string savedPrincipal;
+	std::string savedAccAmount;
+	std::string savedIntAmount;
+	std::string savedAnnRate;
+	std::string savedRate;
+	std::string savedTime;
+	std::string savedResult;
+
 
 	// Char arrays.
 	char principalText[100];
