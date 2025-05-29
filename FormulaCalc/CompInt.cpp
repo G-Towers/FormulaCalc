@@ -10,6 +10,7 @@ BOOL CompInt::compIntWndCreated = 0;
 CompInt::CompInt()
 {
 	hInst = nullptr;
+	accruedInterface = false;
     calc = nullptr;
 
     accAmount = 0.0;
@@ -22,18 +23,20 @@ CompInt::CompInt()
 
 	result = 0.0;
 
-    // Initialize char arrays to empty strings
-    std::memset(principalText, '\0', sizeof(principalText));
-    std::memset(accAmountText, '\0', sizeof(accAmountText));
-    std::memset(intAmountText, '\0', sizeof(intAmountText));
-    std::memset(annRateText, '\0', sizeof(annRateText));
-    std::memset(rateText, '\0', sizeof(rateText));
-    std::memset(timeText, '\0', sizeof(timeText));
-    std::memset(resultText, '\0', sizeof(resultText));
-    std::memset(charArrA, '\0', sizeof(charArrA));
-    std::memset(charArrB, '\0', sizeof(charArrB));
-    std::memset(charArrC, '\0', sizeof(charArrC));
-    std::memset(charArrD, '\0', sizeof(charArrD));
+    memset(principalText, 0, sizeof(principalText));
+	memset(accAmountText, 0, sizeof(accAmountText));
+	memset(intAmountText, 0, sizeof(intAmountText));
+	memset(annRateText, 0, sizeof(annRateText));
+	memset(timeText, 0, sizeof(timeText));
+	memset(resultText, 0, sizeof(resultText));
+
+	savedPrincipal = "";
+	savedAccAmount = "";
+	savedIntAmount = "";
+	savedAnnRate = "";
+	savedTime = "";
+	savedResult = "";
+
 
     hGrpInfo = nullptr;
 
@@ -58,7 +61,12 @@ CompInt::CompInt()
     hComboBoxCalculate = nullptr;
     hComboBoxCompound = nullptr;
 
-    hBtnCalc = nullptr;
+    hBtnCalcAcc = nullptr;
+    hBtnCalcPrincA = nullptr;
+    hBtnCalcPrincI = nullptr;
+    hBtnCalcRate = nullptr;
+    hBtnCalcTime = nullptr;
+
     hBtnClear = nullptr;
     hBtnClose = nullptr;
 
@@ -71,14 +79,19 @@ CompInt::~CompInt()
 
 LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    int wmId = LOWORD(wParam);
-    int wmEvent = HIWORD(wParam);
 
     switch (uMsg)
     {
     case WM_COMMAND:
-        CalcCommand(m_hWnd, wParam, lParam);
-        CompoundCommand(m_hWnd, wParam, lParam);
+    {
+        int wmId = LOWORD(wParam);
+        int wmEvent = HIWORD(wParam);
+
+        if (wmId == COMPINT_COMBOBOX_CALC && wmEvent == CBN_SELCHANGE)
+            CalcCommand(m_hWnd, wParam, lParam);
+
+        else if (wmId == COMPINT_COMBOBOX_COMPOUND && wmEvent == CBN_SELCHANGE)
+            CompoundCommand(m_hWnd, wParam, lParam);
 
         switch (wmId)
         {
@@ -86,9 +99,9 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             ClearCompIntText();
             break;
 
-        case COMPINT_CALC_ACCRUED_BUTTON:
+        case COMPINT_ACCRUED_BUTTON:
             (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcAccrued) :
-			    CompIntCalcThunk(&compIntObj, &CompInt::CalcContAccruedPrincPlusInt);
+                CompIntCalcThunk(&compIntObj, &CompInt::CalcContAccruedPrincPlusInt);
             break;
 
         case COMPINT_PRINCA_BUTTON:
@@ -101,7 +114,7 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 CompIntCalcThunk(&compIntObj, &CompInt::CalcContPrincInt);
             break;
 
-        case COMPINT_CALC_RATE_BUTTON:
+        case COMPINT_RATE_BUTTON:
             (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcRate) :
                 CompIntCalcThunk(&compIntObj, &CompInt::CalcContRate);
             break;
@@ -121,6 +134,7 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 
         break;
+    }
 
     case WM_CREATE:
         CompIntInterface();
@@ -217,10 +231,23 @@ void CompInt::CompIntInterface()
     hBtnClear = Widget::Button(430, 210, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
     hBtnClose = Widget::Button(430, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
 
+	// Calculate Buttons.
+    hBtnCalcAcc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_ACCRUED_BUTTON);
+    hBtnCalcPrincA = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCA_BUTTON);
+    hBtnCalcPrincI = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCI_BUTTON);
+    hBtnCalcRate = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_RATE_BUTTON);
+    hBtnCalcTime = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_TIME_BUTTON);
+
+
 }
 
 void CompInt::CompIntAccruedInterface()
 {
+    if (accruedInterface)
+		return; // Already set up.
+
+	accruedInterface = true; // Set the flag.
+
     // Labels
     ShowWindow(hLblPrincipal, SW_SHOW);
     ShowWindow(hLblAnnRate, SW_SHOW);
@@ -231,15 +258,21 @@ void CompInt::CompIntAccruedInterface()
     ShowWindow(hInAnnRate, SW_SHOW);
     ShowWindow(hInTime, SW_SHOW);
 
+    // Calculate.
+    ShowWindow(hBtnCalcAcc, SW_SHOW);
+
     // Hide others
     ShowWindow(hLblAccAmount, SW_HIDE);
     ShowWindow(hInAccAmount, SW_HIDE);
     ShowWindow(hLblIntAmount, SW_HIDE);
     ShowWindow(hInIntAmount, SW_HIDE);
 
-    // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_ACCRUED_BUTTON);
+    ShowWindow(hBtnCalcPrincA, SW_HIDE);
+    ShowWindow(hBtnCalcPrincI, SW_HIDE);
+    ShowWindow(hBtnCalcRate, SW_HIDE);
+    ShowWindow(hBtnCalcTime, SW_HIDE);
 
+    
 }
 
 void CompInt::CompIntPrinAInterface()
@@ -254,14 +287,21 @@ void CompInt::CompIntPrinAInterface()
     ShowWindow(hInAnnRate, SW_SHOW);
     ShowWindow(hInTime, SW_SHOW);
 
+    // Calculate.
+    ShowWindow(hBtnCalcPrincA, SW_SHOW);
+
 	// Hide others
 	ShowWindow(hLblPrincipal, SW_HIDE);
 	ShowWindow(hInPrincipal, SW_HIDE);
 	ShowWindow(hLblIntAmount, SW_HIDE);
 	ShowWindow(hInIntAmount, SW_HIDE);
 
-    // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCA_BUTTON);
+    ShowWindow(hBtnCalcAcc, SW_HIDE);
+    ShowWindow(hBtnCalcPrincI, SW_HIDE);
+    ShowWindow(hBtnCalcRate, SW_HIDE);
+    ShowWindow(hBtnCalcTime, SW_HIDE);
+
+    
 }
 
 void CompInt::CompIntPrinIInterface()
@@ -276,14 +316,21 @@ void CompInt::CompIntPrinIInterface()
     ShowWindow(hInAnnRate, SW_SHOW);
     ShowWindow(hInTime, SW_SHOW);
 
+    // Calculate.
+    ShowWindow(hBtnCalcPrincI, SW_SHOW);
+
 	// Hide others
 	ShowWindow(hLblPrincipal, SW_HIDE);
 	ShowWindow(hInPrincipal, SW_HIDE);
 	ShowWindow(hLblAccAmount, SW_HIDE);
 	ShowWindow(hInAccAmount, SW_HIDE);
 
-    // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCI_BUTTON);
+    ShowWindow(hBtnCalcAcc, SW_HIDE);
+    ShowWindow(hBtnCalcPrincA, SW_HIDE);
+    ShowWindow(hBtnCalcRate, SW_HIDE);
+    ShowWindow(hBtnCalcTime, SW_HIDE);
+
+    
 }
 
 void CompInt::CompIntRateInterface()
@@ -298,15 +345,21 @@ void CompInt::CompIntRateInterface()
     ShowWindow(hInAccAmount, SW_SHOW);
     ShowWindow(hInTime, SW_SHOW);
 
+    // Calculate.
+    ShowWindow(hBtnCalcRate, SW_SHOW);
+
 	// Hide others
 	ShowWindow(hLblIntAmount, SW_HIDE);
 	ShowWindow(hInIntAmount, SW_HIDE);
 	ShowWindow(hLblAnnRate, SW_HIDE);
 	ShowWindow(hInAnnRate, SW_HIDE);
 
-    // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_CALC_RATE_BUTTON);
+    ShowWindow(hBtnCalcAcc, SW_HIDE);
+    ShowWindow(hBtnCalcPrincA, SW_HIDE);
+    ShowWindow(hBtnCalcPrincI, SW_HIDE);
+    ShowWindow(hBtnCalcTime, SW_HIDE);
 
+    
 }
 
 void CompInt::CompIntTimeInterface()
@@ -321,19 +374,27 @@ void CompInt::CompIntTimeInterface()
     ShowWindow(hInAccAmount, SW_SHOW);
     ShowWindow(hInAnnRate, SW_SHOW);
 
+    // Calculate.
+    ShowWindow(hBtnCalcTime, SW_SHOW);
+
 	// Hide others
 	ShowWindow(hLblIntAmount, SW_HIDE);
 	ShowWindow(hInIntAmount, SW_HIDE);
 	ShowWindow(hLblTime, SW_HIDE);
 	ShowWindow(hInTime, SW_HIDE);
 
-    // Buttons.
-    hBtnCalc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_TIME_BUTTON);
+    ShowWindow(hBtnCalcAcc, SW_HIDE);
+    ShowWindow(hBtnCalcPrincA, SW_HIDE);
+    ShowWindow(hBtnCalcPrincI, SW_HIDE);
+    ShowWindow(hBtnCalcRate, SW_HIDE);
+
+    
+
 }
 
 void CompInt::HideAllInputControls()
 {
-	// Labels
+	// Labels.
     ShowWindow(hLblPrincipal, SW_HIDE);
     ShowWindow(hLblAccAmount, SW_HIDE);
     ShowWindow(hLblIntAmount, SW_HIDE);
@@ -346,6 +407,16 @@ void CompInt::HideAllInputControls()
     ShowWindow(hInIntAmount, SW_HIDE);
     ShowWindow(hInAnnRate, SW_HIDE);
     ShowWindow(hInTime, SW_HIDE);
+
+    // Buttons.
+    ShowWindow(hBtnCalcAcc, SW_HIDE);
+    ShowWindow(hBtnCalcPrincA, SW_HIDE);
+    ShowWindow(hBtnCalcPrincI, SW_HIDE);
+    ShowWindow(hBtnCalcRate, SW_HIDE);
+    ShowWindow(hBtnCalcTime, SW_HIDE);
+
+    //ShowWindow(hBtnClear, SW_HIDE);
+    //ShowWindow(hBtnClose, SW_HIDE);
 
 }
 
@@ -363,7 +434,7 @@ void CompInt::ClearCompIntWnd()
     DestroyWindow(hInAnnRate);
     DestroyWindow(hInTime);
     //DestroyWindow(hRsltCompInt);
-    DestroyWindow(hBtnCalc);
+    //DestroyWindow(hBtnCalc);
 }
 
 
@@ -405,6 +476,7 @@ void CompInt::CalcCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
     {
         // Hide all controls first
         HideAllInputControls();
+		ResetInterface(); // Reset the interface.
 
         // User selected item.
         int selectedIndex = (int)SendDlgItemMessage(hWnd, COMPINT_COMBOBOX_CALC, CB_GETCURSEL, 0, 0);	// Get the index.
@@ -415,32 +487,27 @@ void CompInt::CalcCommand(HWND hWnd, WPARAM wParam, LPARAM lParam)
         {
         case 0:
             //MessageBox(hWnd, "Total P + I", nullptr, MB_OK);
-            //ClearCompIntWnd();
-            //ClearCompIntText();
+            ClearCompIntText();
             CompIntAccruedInterface();
             break;
         case 1:
             //MessageBox(hWnd, "Principal Using A", nullptr, MB_OK);
-            //ClearCompIntWnd();
-            //ClearCompIntText();
+            ClearCompIntText();
             CompIntPrinAInterface();
             break;
         case 2:
             //MessageBox(hWnd, "Principal Using I", nullptr, MB_OK);
-            //ClearCompIntWnd();
-            //ClearCompIntText();
+            ClearCompIntText();
             CompIntPrinIInterface();
             break;
         case 3:
             //MessageBox(hWnd, "Rate", nullptr, MB_OK);
-            //ClearCompIntWnd();
-            //ClearCompIntText();
+            ClearCompIntText();
             CompIntRateInterface();
             break;
         case 4:
             //MessageBox(hWnd, "Time", nullptr, MB_OK);
-            //ClearCompIntWnd();
-            //ClearCompIntText();
+            ClearCompIntText();
             CompIntTimeInterface();
             break;
         }
@@ -520,26 +587,20 @@ void CompInt::ClearCompIntText()
 void CompInt::ReInit()
 {
 	// Initialize variables to default values.
-    accAmount = 0.0;
     principal = 0.0;
-    rate = 0.0;
-    annRate = 0.0;
+    accAmount = 0.0;
     intAmount = 0.0;
-    //compNum = 0.0;
+    annRate = 0.0;
     time = 0.0;
 
-    // Initialize char arrays to empty strings
-    std::memset(principalText, '\0', sizeof(principalText));
-    std::memset(accAmountText, '\0', sizeof(accAmountText));
-    std::memset(intAmountText, '\0', sizeof(intAmountText));
-    std::memset(annRateText, '\0', sizeof(annRateText));
-    std::memset(rateText, '\0', sizeof(rateText));
-    std::memset(timeText, '\0', sizeof(timeText));
-    std::memset(resultText, '\0', sizeof(resultText));
-    std::memset(charArrA, '\0', sizeof(charArrA));
-    std::memset(charArrB, '\0', sizeof(charArrB));
-    std::memset(charArrC, '\0', sizeof(charArrC));
-    std::memset(charArrD, '\0', sizeof(charArrD));
+	// Clear text buffers.
+    memset(principalText, 0, sizeof(principalText));
+    memset(accAmountText, 0, sizeof(accAmountText));
+    memset(intAmountText, 0, sizeof(intAmountText));
+    memset(annRateText, 0, sizeof(annRateText));
+    memset(timeText, 0, sizeof(timeText));
+    memset(resultText, 0, sizeof(resultText));
+
 }
 
 int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
@@ -547,11 +608,14 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
     // Declare variables.
     int swVal;
     double dblResult = 0.0;
+    char textA[100] = { "" };
+    char textB[100] = { "" };
+    char textC[100] = { "" };
     std::string strResult;
 
-    GetWindowText(hWndA, charArrA, 100);	// Retrieve hWndA.
-    GetWindowText(hWndB, charArrB, 100);    // Retrieve hWndB.
-    GetWindowText(hWndC, charArrC, 100);	// Retrieve hWndC.
+    GetWindowText(hWndA, textA, 100);	// Retrieve textA.
+    GetWindowText(hWndB, textB, 100);   // Retrieve textB.
+    GetWindowText(hWndC, textC, 100);	// Retrieve textC.
 
     // Map message strings to input boxes.
     HandleToString(hInPrincipal, "Principal is not a valid number!\nPlease enter Principal as a valid number."
@@ -563,14 +627,14 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
     HandleToString(hInIntAmount, "Interest Amount is not a valid number!\nPlease enter the amount as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
 
-    HandleToString(hInAnnRate, "Annual Interest Rate is not a valid number!\nPlease enter Annual Interest Rate as a valid number."
+    HandleToString(hInAnnRate, "Annual Interest Rate is not a valid number!\nPlease enter the interest rate as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
 
     HandleToString(hInTime, "Time is not a valid number!\nPlease enter Time as a valid number."
         "\nSee -- Help \\ Info-- for more information.");
 
     // Validate user input.
-    if (strcmp(charArrA, "") == 0 || strcmp(charArrB, "") == 0 || strcmp(charArrC, "") == 0)
+    if (strcmp(textA, "") == 0 || strcmp(textB, "") == 0 || strcmp(textC, "") == 0)
     {
         swVal = MessageBoxEx(m_hWnd, "You are missing input!\nPlease enter all values.",
             NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
@@ -588,9 +652,9 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
 
     }
 
-    for (size_t i = 0; i < strlen(charArrA); i++)
+    for (size_t i = 0; i < strlen(textA); i++)
     {
-        if (!isdigit(charArrA[i]) && charArrA[i] != '.' && charArrA[i] != ',')
+        if (!isdigit(textA[i]) && textA[i] != '.' && textA[i] != ',')
         {
             swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndA).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
 
@@ -607,9 +671,9 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
         }
     }
 
-    for (size_t i = 0; i < strlen(charArrB); i++)
+    for (size_t i = 0; i < strlen(textB); i++)
     {
-        if (!isdigit(charArrB[i]) && charArrB[i] != '.' && charArrB[i] != ',')
+        if (!isdigit(textB[i]) && textB[i] != '.' && textB[i] != ',')
         {
             swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndB).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
 
@@ -626,9 +690,9 @@ int CompInt::UserIn(HWND hWndA, HWND hWndB, HWND hWndC)
         }
     }
 
-    for (size_t i = 0; i < strlen(charArrC); i++)
+    for (size_t i = 0; i < strlen(textC); i++)
     {
-        if (!isdigit(charArrC[i]) && charArrC[i] != '.' && charArrC[i] != ',')
+        if (!isdigit(textC[i]) && textC[i] != '.' && textC[i] != ',')
         {
             swVal = MessageBoxEx(m_hWnd, GetStringFromHandle(hWndC).c_str(), NULL, MB_OKCANCEL | MB_ICONERROR, NULL);
 
@@ -677,10 +741,8 @@ std::string CompInt::ToString(double num)
     return ss.str();
 }
 
-void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
+void CompInt::GetConvert()
 {
-    ReInit();
-
     // Retrieve input box text.
     GetWindowText(hInPrincipal, principalText, 100);
     GetWindowText(hInAccAmount, accAmountText, 100);
@@ -694,27 +756,18 @@ void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
     intAmount = strtod(intAmountText, nullptr);
     annRate = strtod(annRateText, nullptr);
     time = strtod(timeText, nullptr);
+}
+
+void CompInt::CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)())
+{
+    // Clear all.
+    ReInit();
+
+    // Get and convert input text.
+	GetConvert();	
 
     // Calculate.
     (obj->*calc)();
-}
-
-void CompInt::CalcCompoundInt()
-{
-    int inOk = UserIn(hInPrincipal, hInAnnRate, hInTime);
-
-    if (inOk)
-    {    
-        double intRate = rate * 0.01 / 12;  // Convert to decimal and get monthly rate.
-        accAmount = principal * (pow((1 + intRate), compNum * time));
-
-        // Display.
-        std::string resultString = ToString(accAmount); // Get the string.
-        strcpy_s(resultText, resultString.c_str());   // Convert to C-string
-
-        SetWindowText(hRsltCompInt, resultText);	// Display the result.
-
-    }
 }
 
 void CompInt::CalcAccrued()
@@ -786,7 +839,7 @@ void CompInt::CalcRate()
 		annRate = rate * 100.0; // Convert to percentage.
 
         // Display.
-        std::string resultString = ToString(annRate) + " %"; // Get the string.
+        std::string resultString = ToString(annRate) + "%"; // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -801,7 +854,7 @@ void CompInt::CalcRatePercent()
 
 void CompInt::CalcTime()
 {
-    int inOk = UserIn(hInAccAmount, hInPrincipal, hInAnnRate);
+    int inOk = UserIn(hInPrincipal, hInAccAmount, hInAnnRate);
 
     if (inOk)
     {
@@ -872,7 +925,7 @@ void CompInt::CalcContPrincInt()
 
 void CompInt::CalcContRate()
 {
-    int inOk = UserIn(hInPrincipal, hInAccAmount, hInTime);
+    int inOk = UserIn(hInPrincipal, hInAccAmount, hInTime );
 
     if (inOk)
     {
@@ -881,7 +934,7 @@ void CompInt::CalcContRate()
         annRate = rate * 100.0; // Convert to percentage.
 
         // Display.
-        std::string resultString = ToString(annRate) + " %"; // Get the string.
+        std::string resultString = ToString(annRate) + "%"; // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -891,7 +944,7 @@ void CompInt::CalcContRate()
 
 void CompInt::CalcContTime()
 {
-	int inOk = UserIn(hInAccAmount, hInPrincipal, hInAnnRate);
+	int inOk = UserIn(hInPrincipal, hInAccAmount, hInAnnRate);
 
     if (inOk)
     {
@@ -905,6 +958,11 @@ void CompInt::CalcContTime()
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
 	}
 
+}
+
+void CompInt::ResetInterface()
+{
+	accruedInterface = false; // Reset the flag.
 }
 
 void CompInt::SaveInputText()

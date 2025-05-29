@@ -84,6 +84,9 @@ public:
 	std::string ToString(double num);
 	// Convert to string.
 
+	void GetConvert();
+	// Get input from the interface and convert to double.
+
 	void CompIntCalcThunk(CompInt* obj, void(CompInt::* calc)());
 	// Retrieves input, handles conversion and calls calculate functions using pointer.
 
@@ -103,9 +106,6 @@ public:
 		ln = The natural logarithm used for calculating time.
 
 	*/
-
-	void CalcCompoundInt();
-	// Initial test calculation.
 
 	void CalcAccrued();
 	// Calculate accrued amount, Pricipal + Interest.
@@ -156,6 +156,9 @@ public:
 	// Calculate time, solve for t.
 	// t = ln(A/P) / r.	
 
+	void ResetInterface();
+	// Reset interface flags to initial state.
+
 	void SaveInputText();
 	// Saves input text from the interface.
 
@@ -170,6 +173,7 @@ public:
 private:
 
 	HINSTANCE hInst;
+	bool accruedInterface;	// Flag for accrued interface (initial calculation window).
 
 	static CompInt* inst;	// To use with InstCompIntWnd().
 
@@ -189,6 +193,14 @@ private:
 
 	double result;		// Final result.
 
+	// Char arrays for input.
+	char principalText[100];
+	char accAmountText[100];
+	char intAmountText[100];
+	char annRateText[100];
+	char timeText[100];
+	char resultText[100];
+
 	// strings for saves.
 	std::string savedPrincipal;
 	std::string savedAccAmount;
@@ -198,21 +210,6 @@ private:
 	std::string savedTime;
 	std::string savedResult;
 
-
-	// Char arrays.
-	char principalText[100];
-	char accAmountText[100];
-	char intAmountText[100];
-	char annRateText[100];
-	char rateText[100];
-	char timeText[100];
-
-	char resultText[100];
-
-	char charArrA[100];
-	char charArrB[100];
-	char charArrC[100];
-	char charArrD[100];
 
 	// Groups.
 	HWND hGrpInfo;
@@ -246,7 +243,12 @@ private:
 
 
 	// Buttons.
-	HWND hBtnCalc;
+	HWND hBtnCalcAcc;
+	HWND hBtnCalcPrincA;
+	HWND hBtnCalcPrincI;
+	HWND hBtnCalcRate;
+	HWND hBtnCalcTime;
+
 	HWND hBtnClear;
 	HWND hBtnClose;
 
