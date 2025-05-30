@@ -56,6 +56,7 @@ CompInt::CompInt()
     hInAnnRate = nullptr;
     hInTime = nullptr;
 
+
     hRsltCompInt = nullptr;
 
     hComboBoxCalculate = nullptr;
@@ -141,7 +142,7 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         CompIntAccruedInterface();
         break;
     case WM_SETFOCUS:
-        SetFocus(compIntObj.m_hWnd);
+        SetFocus(compIntObj.hInPrincipal);
         break;
 
     case WM_DESTROY:
@@ -164,6 +165,47 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     }
     return (LRESULT)DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == WM_KEYDOWN && wParam == VK_TAB)
+    {
+        // Get pointer to CompInt instance from GWLP_USERDATA of parent
+        HWND hParent = GetParent(hwnd);
+        CompInt* pThis = reinterpret_cast<CompInt*>(GetWindowLongPtr(hParent, GWLP_USERDATA));
+        if (pThis)
+        {
+            // Find which input this is and move focus
+            HWND inputs[] = { pThis->hInPrincipal, pThis->hInAccAmount, pThis->hInIntAmount, pThis->hInAnnRate, pThis->hInTime };
+            const int numInputs = sizeof(inputs) / sizeof(inputs[0]);
+            for (int i = 0; i < numInputs; ++i)
+            {
+                if (inputs[i] == hwnd)
+                {
+                    // Check if SHIFT is held
+                    bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+                    int dir = shiftDown ? -1 : 1;
+
+                    // Find next/previous visible/enabled input
+                    for (int j = 1; j <= numInputs; ++j)
+                    {
+                        int idx = (i + dir * j + numInputs) % numInputs;
+                        if (inputs[idx] && IsWindowVisible(inputs[idx]) && IsWindowEnabled(inputs[idx]))
+                        {
+                            SetFocus(inputs[idx]);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            return 0; // Handled
+        }
+    }
+    // Call original proc
+    return CallWindowProc(reinterpret_cast<WNDPROC>(GetWindowLongPtr(hwnd, GWLP_USERDATA)), hwnd, msg, wParam, lParam);
+
 }
 
 CompInt& CompInt::InstCompIntWnd()
@@ -223,6 +265,17 @@ void CompInt::CompIntInterface()
     hInIntAmount = Widget::InputBox(180, 80, 80, 30, m_hWnd);
     hInAnnRate = Widget::InputBox(180, 160, 80, 30, m_hWnd);
     hInTime = Widget::InputBox(180, 240, 80, 30, m_hWnd);
+
+	// After creating input boxes in CompIntInterface, subclass and store the original proc
+	// in GWLP_USERDATA. 
+    SetWindowLongPtr(hInPrincipal, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInPrincipal, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetWindowLongPtr(hInAccAmount, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInAccAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetWindowLongPtr(hInIntAmount, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInIntAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetWindowLongPtr(hInAnnRate, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInAnnRate, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetWindowLongPtr(hInTime, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInTime, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+
+    // Also, store 'this' pointer in the parent window for access in InputBoxProc
+    SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
     // Result Box. 
     hRsltCompInt = Widget::ResultBox(180, 300, 110, 30, m_hWnd);
