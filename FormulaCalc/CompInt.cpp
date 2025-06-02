@@ -171,23 +171,18 @@ LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (msg == WM_KEYDOWN && wParam == VK_TAB)
     {
-        // Get pointer to CompInt instance from GWLP_USERDATA of parent
         HWND hParent = GetParent(hwnd);
         CompInt* pThis = reinterpret_cast<CompInt*>(GetWindowLongPtr(hParent, GWLP_USERDATA));
         if (pThis)
         {
-            // Find which input this is and move focus
             HWND inputs[] = { pThis->hInPrincipal, pThis->hInAccAmount, pThis->hInIntAmount, pThis->hInAnnRate, pThis->hInTime };
             const int numInputs = sizeof(inputs) / sizeof(inputs[0]);
             for (int i = 0; i < numInputs; ++i)
             {
                 if (inputs[i] == hwnd)
                 {
-                    // Check if SHIFT is held
                     bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
                     int dir = shiftDown ? -1 : 1;
-
-                    // Find next/previous visible/enabled input
                     for (int j = 1; j <= numInputs; ++j)
                     {
                         int idx = (i + dir * j + numInputs) % numInputs;
@@ -203,8 +198,74 @@ LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return 0; // Handled
         }
     }
-    // Call original proc
-    return CallWindowProc(reinterpret_cast<WNDPROC>(GetWindowLongPtr(hwnd, GWLP_USERDATA)), hwnd, msg, wParam, lParam);
+
+    // Handle ESC key: close the parent window
+    if (wParam == VK_ESCAPE) 
+    {
+        HWND hParent = GetParent(hwnd);
+        if (hParent) 
+        {
+            DestroyWindow(hParent);
+        }
+
+        return 0; // Handled
+    }
+
+    // ENTER Calculates.
+    if (wParam == VK_RETURN) 
+    {
+        HWND hParent = GetParent(hwnd);
+        CompInt* pThis = reinterpret_cast<CompInt*>(GetWindowLongPtr(hParent, GWLP_USERDATA));
+        if (pThis)
+        {
+            // Determine which calculation mode is active by checking which Calculate button is visible
+            if (pThis->hBtnCalcAcc && IsWindowVisible(pThis->hBtnCalcAcc))
+            {
+                if (pThis->compNum != 0)
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcAccrued);
+                else
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcContAccruedPrincPlusInt);
+            }
+            else if (pThis->hBtnCalcPrincA && IsWindowVisible(pThis->hBtnCalcPrincA))
+            {
+                if (pThis->compNum != 0)
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcPrincAccrued);
+                else
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcContPrincAccrued);
+            }
+            else if (pThis->hBtnCalcPrincI && IsWindowVisible(pThis->hBtnCalcPrincI))
+            {
+                if (pThis->compNum != 0)
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcPrincInt);
+                else
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcContPrincInt);
+            }
+            else if (pThis->hBtnCalcRate && IsWindowVisible(pThis->hBtnCalcRate))
+            {
+                if (pThis->compNum != 0)
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcRate);
+                else
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcContRate);
+            }
+            else if (pThis->hBtnCalcTime && IsWindowVisible(pThis->hBtnCalcTime))
+            {
+                if (pThis->compNum != 0)
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcTime);
+                else
+                    pThis->CompIntCalcThunk(pThis, &CompInt::CalcContTime);
+            }
+        }
+
+        return 0; // Handled
+    }
+
+    // Suppress beep on TAB key
+    if (msg == WM_CHAR && wParam == VK_TAB)
+        return 0;
+
+    // Retrieve the original window proc from the property
+    WNDPROC oldProc = (WNDPROC)GetProp(hwnd, TEXT("OldEditProc"));
+    return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
 
 }
 
@@ -266,15 +327,14 @@ void CompInt::CompIntInterface()
     hInAnnRate = Widget::InputBox(180, 160, 80, 30, m_hWnd);
     hInTime = Widget::InputBox(180, 240, 80, 30, m_hWnd);
 
-	// After creating input boxes in CompIntInterface, subclass and store the original proc
-	// in GWLP_USERDATA. 
-    SetWindowLongPtr(hInPrincipal, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInPrincipal, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
-    SetWindowLongPtr(hInAccAmount, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInAccAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
-    SetWindowLongPtr(hInIntAmount, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInIntAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
-    SetWindowLongPtr(hInAnnRate, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInAnnRate, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
-    SetWindowLongPtr(hInTime, GWLP_USERDATA, (LONG_PTR)SetWindowLongPtr(hInTime, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    // After creating input boxes in CompIntInterface, subclass and store the original proc
+    SetProp(hInPrincipal, TEXT("OldEditProc"), (HANDLE)SetWindowLongPtr(hInPrincipal, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetProp(hInAccAmount, TEXT("OldEditProc"), (HANDLE)SetWindowLongPtr(hInAccAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetProp(hInIntAmount, TEXT("OldEditProc"), (HANDLE)SetWindowLongPtr(hInIntAmount, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetProp(hInAnnRate, TEXT("OldEditProc"), (HANDLE)SetWindowLongPtr(hInAnnRate, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
+    SetProp(hInTime, TEXT("OldEditProc"), (HANDLE)SetWindowLongPtr(hInTime, GWLP_WNDPROC, (LONG_PTR)&CompInt::InputBoxProc));
 
-    // Also, store 'this' pointer in the parent window for access in InputBoxProc
+    // Store 'this' pointer in the parent window for access in InputBoxProc
     SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
     // Result Box. 
@@ -833,7 +893,7 @@ void CompInt::CalcAccrued()
         accAmount = principal * (pow((1 + (rate / compNum)), (compNum * time)));
 
         // Display.
-        std::string resultString = "$ " + ToString(accAmount); // Get the string.
+        std::string resultString = "$" + ToString(accAmount); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -853,7 +913,7 @@ void CompInt::CalcPrincAccrued()
         
 
         // Display.
-        std::string resultString = "$ " + ToString(principal); // Get the string.
+        std::string resultString = "$" + ToString(principal); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -873,7 +933,7 @@ void CompInt::CalcPrincInt()
 
 
         // Display.
-        std::string resultString = "$ " + ToString(principal); // Get the string.
+        std::string resultString = "$" + ToString(principal); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
 
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
@@ -936,7 +996,7 @@ void CompInt::CalcContAccruedPrincPlusInt()
         accAmount = principal * pow(e, (rate * time));
 
         // Display.
-        std::string resultString = "$ " + ToString(accAmount); // Get the string.
+        std::string resultString = "$" + ToString(accAmount); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
 	}
@@ -953,7 +1013,7 @@ void CompInt::CalcContPrincAccrued()
         principal = accAmount / pow(e, (rate * time));
 
         // Display.
-        std::string resultString = "$ " + ToString(principal); // Get the string.
+        std::string resultString = "$" + ToString(principal); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
     }
@@ -970,7 +1030,7 @@ void CompInt::CalcContPrincInt()
         principal = intAmount / (pow(e, (rate * time)) - 1);
 
         // Display.
-        std::string resultString = "$ " + ToString(principal); // Get the string.
+        std::string resultString = "$" + ToString(principal); // Get the string.
         strcpy_s(resultText, resultString.c_str());   // Convert to C-string
         SetWindowText(hRsltCompInt, resultText);	// Display the result.
     }
