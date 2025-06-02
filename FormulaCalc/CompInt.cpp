@@ -169,32 +169,46 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	// Handle TAB key for navigation between input boxes.
     if (msg == WM_KEYDOWN && wParam == VK_TAB)
     {
         HWND hParent = GetParent(hwnd);
+
+		// Retrieve the CompInt instance from the parent window's user data.
         CompInt* pThis = reinterpret_cast<CompInt*>(GetWindowLongPtr(hParent, GWLP_USERDATA));
+        
+		// If the instance is valid, proceed with input box navigation.
         if (pThis)
         {
+			// Check if the SHIFT key is pressed to determine the direction of navigation.
             HWND inputs[] = { pThis->hInPrincipal, pThis->hInAccAmount, pThis->hInIntAmount, pThis->hInAnnRate, pThis->hInTime };
-            const int numInputs = sizeof(inputs) / sizeof(inputs[0]);
+			const int numInputs = sizeof(inputs) / sizeof(inputs[0]);   // Number of input controls.
+
+			// Find the index of the current input control that has focus.
             for (int i = 0; i < numInputs; ++i)
             {
+				// Check if the current input control matches the one that has focus.
                 if (inputs[i] == hwnd)
                 {
-                    bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-                    int dir = shiftDown ? -1 : 1;
+					bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0; // Check if SHIFT is pressed.
+					int dir = shiftDown ? -1 : 1;   // Determine direction based on SHIFT key.
+
+					// Find the next input control to focus on.
                     for (int j = 1; j <= numInputs; ++j)
                     {
-                        int idx = (i + dir * j + numInputs) % numInputs;
+						int idx = (i + dir * j + numInputs) % numInputs;    // Wrap around the index.
+
+						// Check if the next input is visible and enabled
                         if (inputs[idx] && IsWindowVisible(inputs[idx]) && IsWindowEnabled(inputs[idx]))
                         {
-                            SetFocus(inputs[idx]);
+							SetFocus(inputs[idx]);  // Set focus to the next input.
                             break;
                         }
                     }
                     break;
                 }
             }
+
             return 0; // Handled
         }
     }
