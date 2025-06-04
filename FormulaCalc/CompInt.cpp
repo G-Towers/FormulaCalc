@@ -3,8 +3,10 @@
 
 #include "CompInt.h"
 
-CompInt CompInt::compIntObj;
-CompInt* CompInt::inst = nullptr;
+// Remove the static instance and window creation flags
+//CompInt CompInt::compIntObj;
+//CompInt* CompInt::inst = nullptr;
+
 BOOL CompInt::compIntWndCreated = 0;
 
 CompInt::CompInt()
@@ -73,9 +75,48 @@ CompInt::CompInt()
 
 }
 
+void SafeDestroyWindow(HWND& hwnd) 
+{
+    if (hwnd) {
+        DestroyWindow(hwnd);
+        hwnd = nullptr;
+    }
+}
+
 CompInt::~CompInt()
 {
+    // Destroy all owned windows/controls
+    SafeDestroyWindow(hGrpInfo);
 
+    SafeDestroyWindow(hLblPrincipal);
+    SafeDestroyWindow(hLblAccAmount);
+    SafeDestroyWindow(hLblIntAmount);
+    SafeDestroyWindow(hLblAnnRate);
+    SafeDestroyWindow(hLblTime);
+    SafeDestroyWindow(hLblCalculate);
+    SafeDestroyWindow(hLblCompound);
+    SafeDestroyWindow(hLblResult);
+
+    SafeDestroyWindow(hInPrincipal);
+    SafeDestroyWindow(hInAccAmount);
+    SafeDestroyWindow(hInIntAmount);
+    SafeDestroyWindow(hInAnnRate);
+    SafeDestroyWindow(hInTime);
+    SafeDestroyWindow(hRsltCompInt);
+
+    SafeDestroyWindow(hComboBoxCalculate);
+    SafeDestroyWindow(hComboBoxCompound);
+
+    SafeDestroyWindow(hBtnCalcAcc);
+    SafeDestroyWindow(hBtnCalcPrincA);
+    SafeDestroyWindow(hBtnCalcPrincI);
+    SafeDestroyWindow(hBtnCalcRate);
+    SafeDestroyWindow(hBtnCalcTime);
+    SafeDestroyWindow(hBtnClear);
+    SafeDestroyWindow(hBtnClose);
+
+    // Clear any maps or containers
+    msgBxStrMap.clear();
 }
 
 LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -101,28 +142,28 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case COMPINT_ACCRUED_BUTTON:
-            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcAccrued) :
-                CompIntCalcThunk(&compIntObj, &CompInt::CalcContAccruedPrincPlusInt);
+            (compNum != 0) ? CompIntCalcThunk(this, &CompInt::CalcAccrued) :
+                CompIntCalcThunk(this, &CompInt::CalcContAccruedPrincPlusInt);
             break;
 
         case COMPINT_PRINCA_BUTTON:
-            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincAccrued) :
-                CompIntCalcThunk(&compIntObj, &CompInt::CalcContPrincAccrued);
+            (compNum != 0) ? CompIntCalcThunk(this, &CompInt::CalcPrincAccrued) :
+                CompIntCalcThunk(this, &CompInt::CalcContPrincAccrued);
             break;
 
         case COMPINT_PRINCI_BUTTON:
-            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcPrincInt) :
-                CompIntCalcThunk(&compIntObj, &CompInt::CalcContPrincInt);
+            (compNum != 0) ? CompIntCalcThunk(this, &CompInt::CalcPrincInt) :
+                CompIntCalcThunk(this, &CompInt::CalcContPrincInt);
             break;
 
         case COMPINT_RATE_BUTTON:
-            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcRate) :
-                CompIntCalcThunk(&compIntObj, &CompInt::CalcContRate);
+            (compNum != 0) ? CompIntCalcThunk(this, &CompInt::CalcRate) :
+                CompIntCalcThunk(this, &CompInt::CalcContRate);
             break;
 
         case COMPINT_TIME_BUTTON:
-            (compNum != 0) ? CompIntCalcThunk(&compIntObj, &CompInt::CalcTime) :
-                CompIntCalcThunk(&compIntObj, &CompInt::CalcContTime);
+            (compNum != 0) ? CompIntCalcThunk(this, &CompInt::CalcTime) :
+                CompIntCalcThunk(this, &CompInt::CalcContTime);
             break;
 
         case COMPINT_CLOSE_BUTTON:
@@ -142,7 +183,7 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         CompIntAccruedInterface();
         break;
     case WM_SETFOCUS:
-        SetFocus(compIntObj.hInPrincipal);
+        SetFocus(InstCompIntWnd().hInPrincipal);
         break;
 
     case WM_DESTROY:
@@ -285,17 +326,13 @@ LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 CompInt& CompInt::InstCompIntWnd()
 {
-    if (!inst)
-    {
-        inst = new CompInt();
-    }
-
-    return *inst;
+    static CompInt inst;
+    return inst;
 }
 
 HINSTANCE CompInt::GetInstance() noexcept
 {
-    return compIntObj.hInst;
+    return InstCompIntWnd().hInst;
 }
 
 void CompInt::CompIntWnd()

@@ -7,13 +7,17 @@
 
 class CompInt : public BaseWindow<CompInt>
 {
-public:
+private:
 	CompInt();
+	~CompInt();
 
+public:
+	
+	// Delete copy/move semantics
 	CompInt(const CompInt&) = delete;
 	CompInt& operator=(const CompInt&) = delete;
 
-	~CompInt();
+	
 
 	const char* ClassName() const { return "CompIntClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -175,14 +179,14 @@ public:
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL compIntWndCreated;	// Flag for window created.
-	static CompInt compIntObj;
+	//static CompInt compIntObj;
 
 private:
 
 	HINSTANCE hInst;
 	bool accruedInterface;	// Flag for accrued interface (initial calculation window).
 
-	static CompInt* inst;	// To use with InstCompIntWnd().
+	//static CompInt* inst;	// To use with InstCompIntWnd().
 
 	typedef void(CompInt::* fncPtr)();		// Function Pointer.
 	fncPtr calc;

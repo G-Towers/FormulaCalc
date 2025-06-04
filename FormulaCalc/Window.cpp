@@ -106,7 +106,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_FINANCE_COMPOUNDINTEREST:
-			CompInt::compIntObj.CompIntWnd();
+			CompInt::InstCompIntWnd().CompIntWnd();
 			break;
 
 		case ID_FINANCE_LOAN:
