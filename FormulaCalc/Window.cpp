@@ -10,11 +10,6 @@
 #include "CompInt.h"
 #include "WinMsgMap.h"
 
-
-//// Do we need this?
-BOOL VolWnd::volWndCreated = 0;
-VolWnd* pVolWnd = nullptr;
-VolWnd* VolWnd::inst = nullptr;
 HINSTANCE hInst = GetModuleHandle(NULL);
 
 std::vector<StanDev*> stanDevWindows;	// Vector to hold StanDev windows.
@@ -88,7 +83,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_CALCULATE_VOLUME:
-			VolWnd::volObj.VolumeWnd();	
+			VolWnd::InstVolWnd().VolumeWnd();
 			break;
 
 		case ID_STATISTICS_STANDARDDEVIATION:

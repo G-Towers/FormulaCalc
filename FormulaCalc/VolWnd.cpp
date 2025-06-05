@@ -3,8 +3,10 @@
 #include "VolWnd.h"
 #include "WinMsgMap.h"
 
+BOOL VolWnd::volWndCreated = 0;
+
 const double PI = 3.141592654;
-VolWnd VolWnd::volObj;	// Initialize volObj.
+
 MSG msg;
 
 VolWnd::VolWnd()
@@ -36,6 +38,42 @@ VolWnd::VolWnd()
 	hCloseBtn = nullptr;
 }
 
+void VolWnd::SafeDestroyWindow(HWND& hwnd)
+{
+	if (hwnd != nullptr && IsWindow(hwnd)) 
+	{
+		DestroyWindow(hwnd);
+		hwnd = nullptr; // Set to nullptr after destruction
+	}
+}
+
+VolWnd::~VolWnd()
+{
+	// Destroy all owned windows/controls
+	SafeDestroyWindow(hLengthLabel);
+	SafeDestroyWindow(hBaseLabel);
+	SafeDestroyWindow(hWidthLabel);
+	SafeDestroyWindow(hHeightLabel);
+	SafeDestroyWindow(hRadiusLabel);
+	SafeDestroyWindow(hLowRadiusLabel);
+	SafeDestroyWindow(hResultLabel);
+
+	SafeDestroyWindow(hComboBoxSelItem);
+
+	SafeDestroyWindow(hLengthBox);
+	SafeDestroyWindow(hBaseBox);
+	SafeDestroyWindow(hWidthBox);
+	SafeDestroyWindow(hHeightBox);
+	SafeDestroyWindow(hRadiusBox);
+	SafeDestroyWindow(hLowRadiusBox);
+	SafeDestroyWindow(hResultBox);
+
+	SafeDestroyWindow(hCalcBtn);
+	SafeDestroyWindow(hClearBtn);
+	SafeDestroyWindow(hCloseBtn);
+
+}
+
 LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// Print wParam and lParam to immediate window.
@@ -53,25 +91,25 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case VOLUME_CALCULATE_TRI_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolTriangle);
+			VolumeInputThunk(this, &VolWnd::CalcVolTriangle);
 			break;
 		case VOLUME_CALCULATE_RECT_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolRectangle);
+			VolumeInputThunk(this, &VolWnd::CalcVolRectangle);
 			break;
 		case VOLUME_CALCULATE_SPHERE_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolSphere);
+			VolumeInputThunk(this, &VolWnd::CalcVolSphere);
 			break;
 		case VOLUME_CALCULATE_CYLINDER_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolCylinder);
+			VolumeInputThunk(this, &VolWnd::CalcVolCylinder);
 			break;
 		case VOLUME_CALCULATE_CONE_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolCone);
+			VolumeInputThunk(this, &VolWnd::CalcVolCone);
 			break;
 		case VOLUME_CALCULATE_FRUSTUM_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolFrustum);
+			VolumeInputThunk(this, &VolWnd::CalcVolFrustum);
 			break;
 		case VOLUME_CALCULATE_PYRAMID_BUTTON:
-			VolumeInputThunk(&volObj, &VolWnd::CalcVolPyramid);
+			VolumeInputThunk(this, &VolWnd::CalcVolPyramid);
 			break;
 		case VOLUME_CLEAR_BUTTON:
 			ClearVolumeText();
@@ -90,7 +128,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		VolTriInterface();
 		break;
 	case WM_SETFOCUS:
-		SetFocus(volObj.hLengthBox);
+		SetFocus(InstVolWnd().hLengthBox);
 		break;
 
 	//case WM_GETDLGCODE:
@@ -142,12 +180,28 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 VolWnd& VolWnd::InstVolWnd()
 {
-	if (!inst)
+	static VolWnd inst;
+	return inst;
+}
+
+HINSTANCE VolWnd::GetInstance() noexcept
+{
+	return InstVolWnd().hInst;
+}
+
+void VolWnd::VolumeWnd()
+{
+
+	if (volWndCreated)
+		SetFocus(m_hWnd);
+	else
 	{
-		inst = new VolWnd();
+		CreateWnd("Volume", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
+			0, 250, 250, 480, 350, GetParent(m_hWnd));
+		ShowWindow(m_hWnd, SW_SHOW);
+		volWndCreated = 1;
 	}
 
-	return *inst;
 }
 
 void VolWnd::VolumeInterface()
@@ -270,20 +324,7 @@ void VolWnd::VolPyramidInterface()
 	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_PYRAMID_BUTTON);
 }
 
-void VolWnd::VolumeWnd()
-{
 
-	if (volWndCreated)
-		SetFocus(m_hWnd);
-	else
-	{
-		CreateWnd("Volume", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
-			0, 250, 250, 480, 350, GetParent(m_hWnd));
-		ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
-		volWndCreated = 1;
-	}
-	
-}
 
 void VolWnd::ClearVolumeText()
 {
@@ -298,7 +339,7 @@ void VolWnd::ClearVolumeText()
 	SetWindowText(hResultBox, emptyText);
 	
 	//SendMessage(hComboBoxSelItem, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);	// Reset to first item.
-	SetFocus(volObj.hLengthBox);
+	SetFocus(InstVolWnd().hLengthBox);
 }
 
 void VolWnd::ClearVolumeWnd()
@@ -811,9 +852,4 @@ std::string VolWnd::ToString(double num)
 	return ss.str();	// Return as string.
 }
 
-VolWnd::~VolWnd()
-{
-	//DestroyWindow(m_hWnd);
-	//UnregisterClass("VolWndClass", GetModuleHandle(NULL));
-}
 

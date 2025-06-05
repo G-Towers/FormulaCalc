@@ -11,12 +11,14 @@ private:
 	VolWnd();
 	// Constructor to initialize the Volume Window.
 
+	void SafeDestroyWindow(HWND& hwnd);
+	// Safely destroys a window by checking if it exists.
+
 	~VolWnd();
 	// Destructor to clean up the Volume Window.
 
 public:
 	
-
 	VolWnd(const VolWnd&) = delete;
 	VolWnd& operator=(const VolWnd&) = delete;
 
@@ -25,6 +27,12 @@ public:
 
 	static VolWnd& InstVolWnd();
 	// Singleton to instantiate an object only once.
+
+	static HINSTANCE GetInstance() noexcept;
+	// Gets the handle to the instance.
+
+	void VolumeWnd();
+	// Creates the Volume Window.
 
 	void VolumeInterface();
 	// The Calculate Volume Dialog box interface.
@@ -49,9 +57,6 @@ public:
 
 	void VolPyramidInterface();
 	// Labels and text boxes for pyramid volume calculation.
-
-	void VolumeWnd();
-	// Creates the Volume Window.
 
 	void ClearVolumeText();
 	// Clears all text boxes and resets the combobox.
@@ -112,12 +117,10 @@ public:
 
 	std::string ToString(double num);
 	// Convert double to string.
-
 	
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL volWndCreated;	// Volume window is created.
-	static VolWnd volObj;	// Access the object from anywhere.
 
 private:
 

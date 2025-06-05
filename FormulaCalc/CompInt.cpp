@@ -3,10 +3,6 @@
 
 #include "CompInt.h"
 
-// Remove the static instance and window creation flags
-//CompInt CompInt::compIntObj;
-//CompInt* CompInt::inst = nullptr;
-
 BOOL CompInt::compIntWndCreated = 0;
 
 CompInt::CompInt()
