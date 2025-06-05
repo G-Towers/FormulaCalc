@@ -176,17 +176,17 @@ public:
 	void RestoreInputText();
 	// Restores input text to the interface.
 
-
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
-	static BOOL compIntWndCreated;	// Flag for window created.
-	//static CompInt compIntObj;
+
+	static BOOL compIntWndCreated;	// Flag for window created. 
+	// Used to prevent multiple instances of the window.
+	
 
 private:
 
 	HINSTANCE hInst;
 	bool accruedInterface;	// Flag for accrued interface (initial calculation window).
 
-	//static CompInt* inst;	// To use with InstCompIntWnd().
 
 	typedef void(CompInt::* fncPtr)();		// Function Pointer.
 	fncPtr calc;

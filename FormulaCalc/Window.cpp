@@ -10,12 +10,14 @@
 #include "CompInt.h"
 #include "WinMsgMap.h"
 
+
+//// Do we need this?
 BOOL VolWnd::volWndCreated = 0;
 VolWnd* pVolWnd = nullptr;
 VolWnd* VolWnd::inst = nullptr;
 HINSTANCE hInst = GetModuleHandle(NULL);
 
-//pVolWnd = reinterpret_cast<VolWnd*>(GetWindowLongPtr(VolWnd::volObj.GetWinHandle(), GWLP_USERDATA));
+std::vector<StanDev*> stanDevWindows;	// Vector to hold StanDev windows.
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -90,8 +92,12 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_STATISTICS_STANDARDDEVIATION:
-			StanDev::stanDevObj.StanDevWnd();
+		{
+			StanDev* newStanDev = new StanDev();
+			newStanDev->StanDevWnd();
+			stanDevWindows.push_back(newStanDev);
 			break;
+		}
 
 		case ID_ALGEBRA_QUADRATICFORMULA:
 			QuadForm::quadFormObj.QuadFormWnd();

@@ -6,8 +6,16 @@
 
 class VolWnd : public BaseWindow<VolWnd>
 {
-public:
+private:
+
 	VolWnd();
+	// Constructor to initialize the Volume Window.
+
+	~VolWnd();
+	// Destructor to clean up the Volume Window.
+
+public:
+	
 
 	VolWnd(const VolWnd&) = delete;
 	VolWnd& operator=(const VolWnd&) = delete;
@@ -105,13 +113,16 @@ public:
 	std::string ToString(double num);
 	// Convert double to string.
 
-	~VolWnd();
+	
 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL volWndCreated;	// Volume window is created.
 	static VolWnd volObj;	// Access the object from anywhere.
 
 private:
+
+	HINSTANCE hInst;
+
 	double length, base, height, width, radius,
 		lowRadius, result;
 

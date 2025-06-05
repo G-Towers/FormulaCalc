@@ -17,10 +17,10 @@ public:
 	const char* ClassName() const { return "StanDevClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	static StanDev& InstStanDevWnd();
+	//static StanDev& InstStanDevWnd();
 	// Singleton to instantiate an object only once.
 
-	static HINSTANCE GetInstance() noexcept;
+	//static HINSTANCE GetInstance() noexcept;
 	// Gets the handle to the instance.
 
 	void StanDevInterface();
@@ -54,14 +54,14 @@ public:
 	std::string ToString(double num);
 	// Convert to string.
 
-	static BOOL sdWndCreated;	// Flag for window created.
-	static StanDev stanDevObj;
+	BOOL sdWndCreated;	// Flag for window created.
+	//static StanDev stanDevObj;
 
 private:
 	
 	HINSTANCE hInst;
 	
-	static StanDev* inst;	// To use with InstStanDevWnd().
+	//static StanDev* inst;	// To use with InstStanDevWnd().
 
 	// variables
 	int count;
@@ -93,3 +93,6 @@ private:
 	HWND hCloseBtn;
 
 };
+
+// Global variable to hold the StanDev window instance.
+extern std::vector<StanDev*> stanDevWindows;

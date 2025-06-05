@@ -15,6 +15,9 @@
 #include "Widget.h"
 #include "Resource.h"
 
+
+//extern std::vector<StanDev*> stanDevWindows;
+
 //VolWnd& volumeWin = VolWnd::instVolWnd();
 
 // Dialog Box Procs

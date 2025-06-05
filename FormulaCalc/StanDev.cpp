@@ -1,12 +1,10 @@
 // StanDev.cpp
 
 #include "StanDev.h"
-StanDev StanDev::stanDevObj;
-StanDev* StanDev::inst = nullptr;
-BOOL StanDev::sdWndCreated = 0;
 
 StanDev::StanDev()
 {
+	sdWndCreated = 0;
     hInst = GetModuleHandle(NULL);
 
     count = 0;
@@ -88,15 +86,25 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         StanDevInterface();
         break;
     case WM_SETFOCUS:
-        SetFocus(stanDevObj.hStanDevInput);
+        SetFocus(hStanDevInput);
         break;
     case WM_DESTROY:
+    {
         sdWndCreated = 0;
         UnregisterClass("StanDevClass", hInst);
         DestroyWindow(m_hWnd);
-        
-        //PostQuitMessage(0);
+
+        // Cleanup: remove this instance from the global vector and delete it
+        auto it = std::find(stanDevWindows.begin(), stanDevWindows.end(), this);
+        if (it != stanDevWindows.end())
+        {
+            stanDevWindows.erase(it);
+            delete this;
+        }
+
         return 0;
+    }
+
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -112,20 +120,20 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 
-StanDev& StanDev::InstStanDevWnd()
-{
-    if (!inst)
-    {
-        inst = new StanDev();
-    }
+//StanDev& StanDev::InstStanDevWnd()
+//{
+//    if (!inst)
+//    {
+//        inst = new StanDev();
+//    }
+//
+//    return *inst;
+//}
 
-    return *inst;
-}
-
-HINSTANCE StanDev::GetInstance() noexcept
-{
-    return stanDevObj.hInst;
-}
+//HINSTANCE StanDev::GetInstance() noexcept
+//{
+//    return stanDevObj.hInst;
+//}
 
 void StanDev::StanDevInterface()
 {
@@ -166,6 +174,10 @@ void StanDev::StanDevWnd()
         ShowWindow(m_hWnd, SW_SHOW);
         sdWndCreated = 1;
     }
+
+    // Associate this instance with the window handle
+    SetWindowLongPtr(m_hWnd, GWLP_USERDATA, (LONG_PTR)this);
+
 }
 
 void StanDev::ClearStanDevText()
