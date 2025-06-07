@@ -11,6 +11,7 @@ MSG msg;
 
 VolWnd::VolWnd()
 {
+	defaultInterface = 0;
 	length = 0.0;
 	base = 0.0;
 	height = 0.0;
@@ -18,6 +19,7 @@ VolWnd::VolWnd()
 	radius = 0.0;
 	lowRadius = 0.0;
 	result = 0.0;
+
 	hLengthLabel = nullptr;
 	hBaseLabel = nullptr;
 	hWidthLabel = nullptr;
@@ -25,7 +27,9 @@ VolWnd::VolWnd()
 	hRadiusLabel = nullptr;
 	hLowRadiusLabel = nullptr;
 	hResultLabel = nullptr;
+
 	hComboBoxSelItem = nullptr;
+
 	hLengthBox = nullptr;
 	hBaseBox = nullptr;
 	hWidthBox = nullptr;
@@ -33,18 +37,17 @@ VolWnd::VolWnd()
 	hRadiusBox = nullptr;
 	hLowRadiusBox = nullptr;
 	hResultBox = nullptr;
-	hCalcBtn = nullptr;
+
+	hTriCalcBtn = nullptr;
+	hRectCalcBtn = nullptr;
+	hSphereCalcBtn = nullptr;
+	hCylinderCalcBtn = nullptr;
+	hConeCalcBtn = nullptr;
+	hFrusConeCalcBtn = nullptr;
+	hPyramidCalcBtn = nullptr;
+
 	hClearBtn = nullptr;
 	hCloseBtn = nullptr;
-}
-
-void VolWnd::SafeDestroyWindow(HWND& hwnd)
-{
-	if (hwnd != nullptr && IsWindow(hwnd)) 
-	{
-		DestroyWindow(hwnd);
-		hwnd = nullptr; // Set to nullptr after destruction
-	}
 }
 
 VolWnd::~VolWnd()
@@ -56,6 +59,7 @@ VolWnd::~VolWnd()
 	SafeDestroyWindow(hHeightLabel);
 	SafeDestroyWindow(hRadiusLabel);
 	SafeDestroyWindow(hLowRadiusLabel);
+
 	SafeDestroyWindow(hResultLabel);
 
 	SafeDestroyWindow(hComboBoxSelItem);
@@ -66,19 +70,31 @@ VolWnd::~VolWnd()
 	SafeDestroyWindow(hHeightBox);
 	SafeDestroyWindow(hRadiusBox);
 	SafeDestroyWindow(hLowRadiusBox);
+
 	SafeDestroyWindow(hResultBox);
 
-	SafeDestroyWindow(hCalcBtn);
+	SafeDestroyWindow(hTriCalcBtn);
+	SafeDestroyWindow(hRectCalcBtn);
+	SafeDestroyWindow(hSphereCalcBtn);
+	SafeDestroyWindow(hCylinderCalcBtn);
+	SafeDestroyWindow(hConeCalcBtn);
+	SafeDestroyWindow(hFrusConeCalcBtn);
+	SafeDestroyWindow(hPyramidCalcBtn);
+
 	SafeDestroyWindow(hClearBtn);
 	SafeDestroyWindow(hCloseBtn);
+
+	// Clear any maps or containers
+	msgBxStrMap.clear();
 
 }
 
 LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// Print wParam and lParam to immediate window.
-	static WinMsgMap mm;
-	OutputDebugString(mm(uMsg, wParam, lParam).c_str());
+	// Becareful with this, it causes a crash when closing the main window.
+	//static WinMsgMap mm;
+	//OutputDebugString(mm(uMsg, wParam, lParam).c_str());
 
 	int wmId = LOWORD(wParam);
 
@@ -116,7 +132,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case VOLUME_CLOSE_BUTTON:
 			DestroyWindow(m_hWnd);
-			UnregisterClass("VolWndClass", GetModuleHandle(NULL));
+			//UnregisterClass("VolWndClass", GetModuleHandle(NULL));
 			break;
 		}
 	}
@@ -125,7 +141,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		// Call to the interface function.
 		//Interface::MainInterface(m_hWnd, GetModuleHandle(NULL));
 		VolumeInterface();
-		VolTriInterface();
+		//VolTriInterface();
 		break;
 	case WM_SETFOCUS:
 		SetFocus(InstVolWnd().hLengthBox);
@@ -149,7 +165,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	//	break;
 		
 	case WM_DESTROY:
-		DestroyWindow(m_hWnd);
+		//DestroyWindow(m_hWnd);
 		UnregisterClass("VolWndClass", GetModuleHandle(NULL));
 		volWndCreated = 0;
 		//PostQuitMessage(0);
@@ -213,115 +229,304 @@ void VolWnd::VolumeInterface()
 	//ComboBoxList(hComboBoxSelItem);	// Items in the combobox.
 	VolumeDlgList(m_hWnd);
 
-	// Results.
+	// Text labels.
+	hLengthLabel = Widget::RLabel(60, 85, 50, 25, "Length:", m_hWnd);
+	hBaseLabel = Widget::RLabel(60, 125, 50, 25, "Base:", m_hWnd);
+	hWidthLabel = Widget::RLabel(60, 125, 50, 25, "Width:", m_hWnd);
+	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	hRadiusLabel = Widget::RLabel(60, 85, 50, 25, "Radius:", m_hWnd);
+	hLowRadiusLabel = Widget::RLabel(60, 115, 50, 30, "Lower Radius:", m_hWnd);
 	hResultLabel = Widget::RLabel(60, 215, 50, 25, "Result:", m_hWnd);
+
+	// Input boxes.
+	hLengthBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
+	hBaseBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
+	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	hWidthBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
+	hRadiusBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
+	hLowRadiusBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
 	hResultBox = Widget::ResultBox(120, 210, 150, 25, m_hWnd);
 
 	// Buttons.
+	hTriCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_TRI_BUTTON);
+	hRectCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_RECT_BUTTON);
+	hSphereCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_SPHERE_BUTTON);
+	hCylinderCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_CYLINDER_BUTTON);
+	hConeCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_CONE_BUTTON);
+	hFrusConeCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_FRUSTUM_BUTTON);
+	hPyramidCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_PYRAMID_BUTTON);
+
 	hClearBtn = Widget::Button(320, 190, 90, 30, "Clear", m_hWnd, (HMENU)VOLUME_CLEAR_BUTTON);
 	hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
+
+	if (defaultInterface == 0)
+	{
+		// Show the default interface.
+		VolTriInterface();
+		defaultInterface = 1;
+
+		// Set focus to the first input box.
+		SetFocus(hLengthBox);
+	}
 }
 
 void VolWnd::VolTriInterface()
 {
 	// Text labels.
-	hLengthLabel = Widget::RLabel(60, 85, 50, 25, "Length:", m_hWnd);
-	hBaseLabel = Widget::RLabel(60, 125, 50, 25, "Base:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hLengthLabel, SW_SHOW);
+	ShowWindow(hBaseLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hLengthBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
-	hBaseBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hLengthBox, SW_SHOW);
+	ShowWindow(hBaseBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_TRI_BUTTON);
+	ShowWindow(hTriCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hRadiusLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+	
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hRadiusBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+	
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+
+
 }
 
 void VolWnd::VolRectInterface()
 {
 	// Text labels.
-	hLengthLabel = Widget::RLabel(60, 85, 50, 25, "Length:", m_hWnd);
-	hWidthLabel = Widget::RLabel(60, 125, 50, 25, "Width:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hLengthLabel, SW_SHOW);
+	ShowWindow(hWidthLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hLengthBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
-	hWidthBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hLengthBox, SW_SHOW);
+	ShowWindow(hWidthBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_RECT_BUTTON);
+	ShowWindow(hRectCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hRadiusLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+	
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hRadiusBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+		
 }
 
 void VolWnd::VolSphereInterface()
 {
 	// Text labels.
-	hRadiusLabel = Widget::RLabel(60, 85, 50, 25, "Radius:", m_hWnd);
+	ShowWindow(hRadiusLabel, SW_SHOW);
 
 	// Input boxes.
-	hRadiusBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
+	ShowWindow(hRadiusBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_SPHERE_BUTTON);
+	ShowWindow(hSphereCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hHeightLabel, SW_HIDE);
+	
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hHeightBox, SW_HIDE);
+		
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+
 }
 
 void VolWnd::VolCylinderInterface()
 {
 	// Text labels.
-	hRadiusLabel = Widget::RLabel(60, 85, 50, 25, "Radius:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hRadiusLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hRadiusBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hRadiusBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_CYLINDER_BUTTON);
+	ShowWindow(hCylinderCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+
 }
 
 void VolWnd::VolConeInterface()
 {
 	// Text labels.
-	hRadiusLabel = Widget::RLabel(60, 85, 50, 25, "Radius:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hRadiusLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hRadiusBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hRadiusBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_CONE_BUTTON);
+	ShowWindow(hConeCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+
 }
 
 void VolWnd::VolFrusConeInterface()
 {
 	// Text labels.
-	hRadiusLabel = Widget::RLabel(60, 75, 50, 35, "Upper  Radius:", m_hWnd);
-	hLowRadiusLabel = Widget::RLabel(60, 115, 50, 35, "Lower  Radius:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hRadiusLabel, SW_SHOW);
+	ShowWindow(hLowRadiusLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hRadiusBox = Widget::InputBox(120, 80, 150, 25, m_hWnd);
-	hLowRadiusBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hRadiusBox, SW_SHOW);
+	ShowWindow(hLowRadiusBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_FRUSTUM_BUTTON);
+	ShowWindow(hFrusConeCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
 }
 
 void VolWnd::VolPyramidInterface()
 {
 	// Text labels.
-	hBaseLabel = Widget::RLabel(60, 125, 50, 25, "Base:", m_hWnd);
-	hHeightLabel = Widget::RLabel(60, 165, 50, 25, "Height:", m_hWnd);
+	ShowWindow(hBaseLabel, SW_SHOW);
+	ShowWindow(hHeightLabel, SW_SHOW);
 
 	// Input boxes.
-	hBaseBox = Widget::InputBox(120, 120, 150, 25, m_hWnd);
-	hHeightBox = Widget::InputBox(120, 160, 150, 25, m_hWnd);
+	ShowWindow(hBaseBox, SW_SHOW);
+	ShowWindow(hHeightBox, SW_SHOW);
 
 	// Calculate.
-	hCalcBtn = Widget::Button(320, 140, 90, 30, "Calculate", m_hWnd, (HMENU)VOLUME_CALCULATE_PYRAMID_BUTTON);
+	ShowWindow(hPyramidCalcBtn, SW_SHOW);
+
+	// Hide other controls.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hRadiusLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hRadiusBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+
+
+}
+
+void VolWnd::HideInputControls()
+{
+	// Labels.
+	ShowWindow(hLengthLabel, SW_HIDE);
+	ShowWindow(hBaseLabel, SW_HIDE);
+	ShowWindow(hWidthLabel, SW_HIDE);
+	ShowWindow(hHeightLabel, SW_HIDE);
+	ShowWindow(hRadiusLabel, SW_HIDE);
+	ShowWindow(hLowRadiusLabel, SW_HIDE);
+
+	// Input boxes.
+	ShowWindow(hLengthBox, SW_HIDE);
+	ShowWindow(hBaseBox, SW_HIDE);
+	ShowWindow(hWidthBox, SW_HIDE);
+	ShowWindow(hHeightBox, SW_HIDE);
+	ShowWindow(hRadiusBox, SW_HIDE);
+	ShowWindow(hLowRadiusBox, SW_HIDE);
+
+	// Buttons.
+	ShowWindow(hTriCalcBtn, SW_HIDE);
+	ShowWindow(hRectCalcBtn, SW_HIDE);
+	ShowWindow(hSphereCalcBtn, SW_HIDE);
+	ShowWindow(hCylinderCalcBtn, SW_HIDE);
+	ShowWindow(hConeCalcBtn, SW_HIDE);
+	ShowWindow(hFrusConeCalcBtn, SW_HIDE);
+	ShowWindow(hPyramidCalcBtn, SW_HIDE);
+
 }
 
 
@@ -330,16 +535,17 @@ void VolWnd::ClearVolumeText()
 {
 	const char* emptyText = "";
 
-	SetWindowText(hLengthBox, emptyText);
-	SetWindowText(hBaseBox, emptyText);
-	SetWindowText(hWidthBox, emptyText);
-	SetWindowText(hHeightBox, emptyText);
-	SetWindowText(hRadiusBox, emptyText);
-	SetWindowText(hLowRadiusBox, emptyText);
-	SetWindowText(hResultBox, emptyText);
+	// Guard Window handles before setting text.
+	if (hLengthBox && IsWindow(hLengthBox)) SetWindowText(hLengthBox, emptyText);
+	if (hBaseBox && IsWindow(hBaseBox)) SetWindowText(hBaseBox, emptyText);
+	if (hWidthBox && IsWindow(hWidthBox)) SetWindowText(hWidthBox, emptyText);
+	if (hHeightBox && IsWindow(hHeightBox)) SetWindowText(hHeightBox, emptyText);
+	if (hRadiusBox && IsWindow(hRadiusBox)) SetWindowText(hRadiusBox, emptyText);
+	if (hLowRadiusBox && IsWindow(hLowRadiusBox)) SetWindowText(hLowRadiusBox, emptyText);
+	if (hResultBox && IsWindow(hResultBox)) SetWindowText(hResultBox, emptyText);
 	
 	//SendMessage(hComboBoxSelItem, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);	// Reset to first item.
-	SetFocus(InstVolWnd().hLengthBox);
+	//SetFocus(InstVolWnd().hLengthBox);
 }
 
 void VolWnd::ClearVolumeWnd()
@@ -350,13 +556,14 @@ void VolWnd::ClearVolumeWnd()
 	DestroyWindow(hHeightLabel);
 	DestroyWindow(hRadiusLabel);
 	DestroyWindow(hLowRadiusLabel);
+
 	DestroyWindow(hLengthBox);
 	DestroyWindow(hBaseBox);
 	DestroyWindow(hWidthBox);
 	DestroyWindow(hHeightBox);
 	DestroyWindow(hRadiusBox);
 	DestroyWindow(hLowRadiusBox);
-	DestroyWindow(hCalcBtn);
+
 }
 
 void VolWnd::VolumeDlgList(HWND hWnd)
@@ -379,6 +586,12 @@ void VolWnd::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	// Combo Box, simplified.
 	if (HIWORD(wParam) == CBN_SELCHANGE)
 	{
+		// Hide all input controls first.
+		HideInputControls();
+
+		// Reset to default interface.
+		defaultInterface = 0;
+
 		// User selected an item
 		int selectedIndex = (int)SendDlgItemMessage(hWnd, NULL, CB_GETCURSEL, 0, 0);	// Get the index.
 		char selectedText[256] = {};
@@ -390,46 +603,39 @@ void VolWnd::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (selectedIndex)
 		{
 		case 0:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolTriInterface();
-			SetFocus(hLengthBox);
+			//SetFocus(hLengthBox);
 			break;
 		case 1:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolRectInterface();
-			SetFocus(hLengthBox);
+			//SetFocus(hLengthBox);
 			break;
 		case 2:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolSphereInterface();
-			SetFocus(hRadiusBox);
+			//SetFocus(hRadiusBox);
 			break;
 		case 3:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolCylinderInterface();
-			SetFocus(hRadiusBox);
+			//SetFocus(hRadiusBox);
 			break;
 		case 4:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolConeInterface();
-			SetFocus(hRadiusBox);
+			//SetFocus(hRadiusBox);
 			break;
 		case 5:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolFrusConeInterface();
-			SetFocus(hRadiusBox);
+			//SetFocus(hRadiusBox);
 			break;
 		case 6:
-			ClearVolumeWnd();
 			ClearVolumeText();
 			VolPyramidInterface();
-			SetFocus(hBaseBox);
+			//SetFocus(hBaseBox);
 			break;
 		}
 

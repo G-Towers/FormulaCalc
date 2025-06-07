@@ -7,12 +7,8 @@
 class VolWnd : public BaseWindow<VolWnd>
 {
 private:
-
 	VolWnd();
 	// Constructor to initialize the Volume Window.
-
-	void SafeDestroyWindow(HWND& hwnd);
-	// Safely destroys a window by checking if it exists.
 
 	~VolWnd();
 	// Destructor to clean up the Volume Window.
@@ -57,6 +53,9 @@ public:
 
 	void VolPyramidInterface();
 	// Labels and text boxes for pyramid volume calculation.
+
+	void HideInputControls();
+	// Hides all input controls (text boxes, labels).
 
 	void ClearVolumeText();
 	// Clears all text boxes and resets the combobox.
@@ -125,6 +124,7 @@ public:
 private:
 
 	HINSTANCE hInst;
+	bool defaultInterface;	// Default interface flag.
 
 	double length, base, height, width, radius,
 		lowRadius, result;
@@ -165,7 +165,15 @@ private:
 	HWND hResultBox;	// Calculation Result.
 
 	// Buttons.
-	HWND hCalcBtn;
+	HWND hTriCalcBtn;		// Calculate Button.
+	HWND hRectCalcBtn;
+	HWND hSphereCalcBtn;
+	HWND hCylinderCalcBtn;
+	HWND hConeCalcBtn;
+	HWND hFrusConeCalcBtn;
+	HWND hPyramidCalcBtn;
+
+
 	HWND hClearBtn;
 	HWND hCloseBtn;
 	

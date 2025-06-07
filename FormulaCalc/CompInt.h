@@ -185,7 +185,7 @@ public:
 private:
 
 	HINSTANCE hInst;
-	bool accruedInterface;	// Flag for accrued interface (initial calculation window).
+	bool accruedInterface;	// Flag for default interface (initial calculation window).
 
 
 	typedef void(CompInt::* fncPtr)();		// Function Pointer.

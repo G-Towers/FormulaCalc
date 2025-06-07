@@ -71,13 +71,6 @@ CompInt::CompInt()
 
 }
 
-void SafeDestroyWindow(HWND& hwnd) 
-{
-    if (hwnd) {
-        DestroyWindow(hwnd);
-        hwnd = nullptr;
-    }
-}
 
 CompInt::~CompInt()
 {
@@ -176,18 +169,17 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CREATE:
         CompIntInterface();
-        CompIntAccruedInterface();
+        //CompIntAccruedInterface();
         break;
     case WM_SETFOCUS:
         SetFocus(InstCompIntWnd().hInPrincipal);
         break;
 
     case WM_DESTROY:
+		accruedInterface = false; // Reset the interface flag.
         compIntWndCreated = 0;
-        UnregisterClass("CompIntClass", hInst);
-        DestroyWindow(m_hWnd);
+        //UnregisterClass("CompIntClass", hInst);
 
-        //PostQuitMessage(0);
         return 0;
 
     case WM_PAINT:
@@ -398,6 +390,15 @@ void CompInt::CompIntInterface()
     hBtnCalcRate = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_RATE_BUTTON);
     hBtnCalcTime = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_TIME_BUTTON);
 
+    if(!accruedInterface)
+    {
+		// Set the default interface to Accrued Interface.
+		CompIntAccruedInterface(); // Show the accrued interface.
+		accruedInterface = true; // Set the flag.
+
+        // Set the initial focus to the principal input box.
+        SetFocus(hInPrincipal);
+	}
 
 }
 
@@ -437,6 +438,7 @@ void CompInt::CompIntAccruedInterface()
 
 void CompInt::CompIntPrinAInterface()
 {
+
     // Labels
     ShowWindow(hLblAccAmount, SW_SHOW);
     ShowWindow(hLblAnnRate, SW_SHOW);
@@ -466,6 +468,7 @@ void CompInt::CompIntPrinAInterface()
 
 void CompInt::CompIntPrinIInterface()
 {
+
     // Labels
     ShowWindow(hLblIntAmount, SW_SHOW);
     ShowWindow(hLblAnnRate, SW_SHOW);
@@ -489,12 +492,12 @@ void CompInt::CompIntPrinIInterface()
     ShowWindow(hBtnCalcPrincA, SW_HIDE);
     ShowWindow(hBtnCalcRate, SW_HIDE);
     ShowWindow(hBtnCalcTime, SW_HIDE);
-
     
 }
 
 void CompInt::CompIntRateInterface()
 {
+
     // Labels
     ShowWindow(hLblPrincipal, SW_SHOW);
     ShowWindow(hLblAccAmount, SW_SHOW);
@@ -524,6 +527,7 @@ void CompInt::CompIntRateInterface()
 
 void CompInt::CompIntTimeInterface()
 {
+
     // Labels
     ShowWindow(hLblPrincipal, SW_SHOW);
     ShowWindow(hLblAccAmount, SW_SHOW);
@@ -547,8 +551,6 @@ void CompInt::CompIntTimeInterface()
     ShowWindow(hBtnCalcPrincA, SW_HIDE);
     ShowWindow(hBtnCalcPrincI, SW_HIDE);
     ShowWindow(hBtnCalcRate, SW_HIDE);
-
-    
 
 }
 
@@ -736,12 +738,14 @@ void CompInt::ClearCompIntText()
 {
     const char* emptyText = "";
 
-    SetWindowText(hInPrincipal, emptyText);
-    SetWindowText(hInAccAmount, emptyText);
-    SetWindowText(hInIntAmount, emptyText);
-    SetWindowText(hInAnnRate, emptyText);
-    SetWindowText(hInTime, emptyText);
-    SetWindowText(hRsltCompInt, emptyText);
+	// Guard against null or invalid handles before setting text.
+    if (hInPrincipal && IsWindow(hInPrincipal)) SetWindowText(hInPrincipal, emptyText);
+	if (hInAccAmount && IsWindow(hInAccAmount)) SetWindowText(hInAccAmount, emptyText);
+	if (hInIntAmount && IsWindow(hInIntAmount)) SetWindowText(hInIntAmount, emptyText);
+	if (hInAnnRate && IsWindow(hInAnnRate)) SetWindowText(hInAnnRate, emptyText);
+	if (hInTime && IsWindow(hInTime)) SetWindowText(hInTime, emptyText);
+	if (hRsltCompInt && IsWindow(hRsltCompInt)) SetWindowText(hRsltCompInt, emptyText);
+
 }
 
 void CompInt::ReInit()

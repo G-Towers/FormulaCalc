@@ -16,9 +16,14 @@
 #include "Resource.h"
 
 
-//extern std::vector<StanDev*> stanDevWindows;
-
-//VolWnd& volumeWin = VolWnd::instVolWnd();
+inline void SafeDestroyWindow(HWND& hwnd)
+{
+	if (hwnd)
+	{
+		DestroyWindow(hwnd);
+		hwnd = nullptr;
+	}
+}
 
 // Dialog Box Procs
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
