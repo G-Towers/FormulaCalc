@@ -12,7 +12,8 @@
 
 HINSTANCE hInst = GetModuleHandle(NULL);
 
-std::vector<StanDev*> stanDevWindows;	// Vector to hold StanDev windows.
+// Global vector to hold StanDev windows.
+std::vector<StanDev*> stanDevWindows;	// Holds multiple instances of StanDev windows.
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -136,25 +137,13 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CLOSE:
 
-		// Post a WM_CLOSE message to the window
-		//PostMessage(m_hWnd, WM_CLOSE, 0, 0);
-		//if (VolWnd::wndCreated)
-		//{
-		//	PostMessage(pVolWnd->GetWinHandle(), WM_CLOSE, 0, 0);
-		//}
-		//	//MessageBox(m_hWnd, "Window Open", "Please close Volume to continue.", MB_OK);
-		//else
 		PostQuitMessage(0);
 		return 0;
-	//case WM_DESTROY:
-		//if (IsWindowVisible(VolWnd::volObj.GetWinHandle()))
-		//{
-		//	MessageBox(m_hWnd, "Window Open", "Please close Volume to continue.", MB_OK);
-		//}
+	case WM_DESTROY:
 
-		//PostQuitMessage(0);
+		PostQuitMessage(0);
 
-		//return 0;
+		return 0;
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
@@ -192,7 +181,7 @@ void MainWindow::ComboBoxList(HWND hWnd)
 
 	char itemBuff[80];		// Buffer for comboBox list.
 
-	memset(&itemBuff, 0, sizeof(itemBuff));   // Allocate memory for the tube buffer and set to 0.
+	memset(&itemBuff, 0, sizeof(itemBuff));   // Allocate memory for the buffer and set to 0.
 
 	for (int k = 0; k <= 2; k++)	// Traverse the array.
 	{
@@ -211,16 +200,11 @@ void MainWindow::ComboBoxList(HWND hWnd)
 
 void MainWindow::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	//MSG volMsg = { 0 };
 	//BOOL gResult;
 
 	char Item1[100] = "";
 	char Item2[100] = "";
 	char Item3[100] = "";
-
-	// Retrieve the pointer
-	//pVolWnd = reinterpret_cast<VolWnd*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	//pVolWnd = reinterpret_cast<VolWnd*>(GetWindowLongPtr(hWnd, GWLP_WNDPROC));
 
 
 	// ComboBox
@@ -249,39 +233,7 @@ void MainWindow::ComboBoxCommand(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		{
 			//SetWindowText(hWnd, Item3);
 			MessageBox(hWnd, "Item 3 Selected", (LPCSTR)ListItem, MB_OK);
-			//WinObject();
-			//WinFunction();
-			//{
-				// Singleton instantiation.
-				//VolWnd& volumeWin = VolWnd::instVolWnd();
 
-				//if (VolWnd::volObj.wndCreated)
-				//	SetFocus(VolWnd::volObj.GetWinHandle());
-				//else
-				//{
-				//	VolWnd::volObj.CreateWnd("Volume Window", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE, 
-				//		0, 250, 250, 480, 350, GetParent(hWnd));
-				//	ShowWindow(VolWnd::volObj.GetWinHandle(), SW_SHOW);
-				//	VolWnd::volObj.wndCreated = 1;
-
-					// Extract ptr to window class from creation data.
-					//const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
-					//pVolWnd = static_cast<VolWnd*>(pCreate->lpCreateParams);
-					// Set WinAPI-managed user data to store ptr to window class.
-					//SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pVolWnd));
-
-					//while ((gResult = GetMessage(&volMsg, NULL, 0, 0)) > 0)
-					//{
-					//	// To use tabstops.
-					//	if (!IsDialogMessage(volumeWin.GetWinHandle(), &volMsg))
-					//	{
-					//		TranslateMessage(&volMsg);
-					//		DispatchMessage(&volMsg);
-					//	}
-					//}
-					//return (int)volMsg.wParam;
-				//}
-			//}
 		}
 		else
 		{

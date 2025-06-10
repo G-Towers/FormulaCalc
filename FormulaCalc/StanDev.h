@@ -38,10 +38,10 @@ public:
 	int UserIn();
 	// User input and validation.
 
-	std::vector<std::string> split(const char* input, char delimiter);
+	std::vector<std::string> split(const char* input, char delimiter) const;
 	// Custom function to split char array into a vector of strings.
 
-	double stringToDouble(const std::string& str);
+	double stringToDouble(const std::string& str) const;
 	// Function to convert string to double.
 
 	void CalcMean(std::vector<double>& vec);
@@ -51,7 +51,7 @@ public:
 	// Calculates the standard deviation for population and sample size.
 	// Uses BOOL reference parameter to distinguish between the two calculations.
 
-	std::string ToString(double num);
+	std::string ToString(double num) const;
 	// Convert to string.
 
 	BOOL sdWndCreated;	// Flag for window created.
@@ -69,7 +69,7 @@ private:
 	double mean;
 	double meanSum;
 	double devSum;
-	char charArr[256] = {};
+	char charArr[256];
 
 	// Radio Buttons
 	HWND hPopBtn;

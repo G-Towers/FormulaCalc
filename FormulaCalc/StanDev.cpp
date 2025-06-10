@@ -3,33 +3,34 @@
 #include "StanDev.h"
 
 StanDev::StanDev()
+    : 
+    sdWndCreated(0),
+    hInst(GetModuleHandle(NULL)),
+
+    count(0),
+    dev(0.0),
+    mean(0.0),
+    meanSum(0.0),
+    devSum(0.0),
+
+    hPopBtn(nullptr),
+    hSampBtn(nullptr),
+
+    hInputLabel(nullptr),
+    hSumLabel(nullptr),
+    hMeanLabel(nullptr),
+    hDevResultLabel(nullptr),
+
+    hStanDevInput(nullptr),
+    hSumResult(nullptr),
+    hMeanResult(nullptr),
+    hStanDevResult(nullptr),
+
+    hCalcBtn(nullptr),
+    hClearBtn(nullptr),
+    hCloseBtn(nullptr)
 {
-	sdWndCreated = 0;
-    hInst = GetModuleHandle(NULL);
-
-    count = 0;
-    dev = 0.0;
-    mean = 0.0;
-    meanSum = 0.0;
-    devSum = 0.0;
-
-    hPopBtn = nullptr;
-    hSampBtn = nullptr;
-
-    hInputLabel = nullptr;
-    hSumLabel = nullptr;
-    hMeanLabel = nullptr;
-    hDevResultLabel = nullptr;
-
-    hStanDevInput = nullptr;
-    hSumResult = nullptr;
-    hMeanResult = nullptr;
-    hStanDevResult = nullptr;
-    
-    hCalcBtn = nullptr;
-    hClearBtn = nullptr;
-    hCloseBtn = nullptr;
-
+    charArr[0] = '\0';
 }
 
 StanDev::~StanDev()
@@ -47,14 +48,7 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         switch (wmId)
         {
-        //case STANDEV_POP_RADIO:
-        //    if (wmEvent == BN_CLICKED)
-        //        CalcStanDevPop();
-        //    break;
-        //case STANDEV_SMPL_RADIO:
-        //    if (wmEvent == BN_CLICKED)
-        //        CalcStanDevSmpl();
-        //    break;
+
         case STANDEV_CALCULATE:
             if (wmEvent == BN_CLICKED)
             {
@@ -73,21 +67,25 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case STANDEV_CLEAR_BUTTON:
             ClearStanDevText();
             break;
+
         case STANDEV_CLOSE_BUTTON:
             sdWndCreated = 0;
             UnregisterClass("StanDevClass", hInst);
             DestroyWindow(m_hWnd);
+
             return 0;
-            //break;
+
          }
         break;
 
     case WM_CREATE:
         StanDevInterface();
         break;
+
     case WM_SETFOCUS:
         SetFocus(hStanDevInput);
         break;
+
     case WM_DESTROY:
     {
         sdWndCreated = 0;
@@ -120,47 +118,125 @@ LRESULT StanDev::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 
-//StanDev& StanDev::InstStanDevWnd()
-//{
-//    if (!inst)
-//    {
-//        inst = new StanDev();
-//    }
-//
-//    return *inst;
-//}
-
-//HINSTANCE StanDev::GetInstance() noexcept
-//{
-//    return stanDevObj.hInst;
-//}
-
 void StanDev::StanDevInterface()
 {
     // Radio Buttons
     hPopBtn = Widget::ButtonRadio(30, 20, 150, 30, "Population", m_hWnd, (HMENU)STANDEV_POP_RADIO);
+    if (!hPopBtn) // Check if the button was created successfully
+    {
+        MessageBox(m_hWnd, "Failed to create Population radio button.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd); // Close the window if button creation fails
+        return;
+	}
+
     hSampBtn = Widget::ButtonRadio(30, 50, 150, 30, "Sample", m_hWnd, (HMENU)STANDEV_SMPL_RADIO);
+    if (!hSampBtn) 
+    {
+		MessageBox(m_hWnd, "Failed to create Sample radio button.", "Error", MB_OK | MB_ICONERROR);
+        DestroyWindow(m_hWnd); 
+		return;
+	}
+
     SendMessage(hPopBtn, BM_SETCHECK, BST_CHECKED, 0);   // Set initial state.
 
     // Labels
     hInputLabel = Widget::LLabel(30, 95, 150, 30, "Input:", m_hWnd);
+    if (!hInputLabel)
+    {
+        MessageBox(m_hWnd, "Failed to create Input label.", "Error", MB_OK | MB_ICONERROR);
+        DestroyWindow(m_hWnd); 
+		return;
+    }
+
     hDevResultLabel = Widget::RLabelBold(60, 155, 150, 30, "Standard Deviation:", m_hWnd);
+    if (!hDevResultLabel) 
+    {
+        MessageBox(m_hWnd, "Failed to create Standard Deviation label.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd); 
+        return;
+	}
+
     hMeanLabel = Widget::RLabel(60, 195, 150, 30, "Mean:", m_hWnd);
+    if (!hMeanLabel) 
+    {
+		MessageBox(m_hWnd, "Failed to create Mean label.", "Error", MB_OK | MB_ICONERROR); 
+		DestroyWindow(m_hWnd);
+		return;
+	}
+
     hSumLabel = Widget::RLabel(60, 235, 150, 30, "Sum of Squares:", m_hWnd);
+    if (!hSumLabel) 
+	{
+		MessageBox(m_hWnd, "Failed to create Sum of Squares label.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd);
+		return;
+	}
 
     // input/result Boxes.
     hStanDevInput = Widget::InputBoxMulti(70, 90, 230, 45, m_hWnd);  // Input.
+	if (!hStanDevInput)
+	{
+		MessageBox(m_hWnd, "Failed to create Input box.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd);
+		return;
+	}
 
     hStanDevResult = Widget::ResultBox(220, 150, 80, 30, m_hWnd);    // Standard Deviation.
+	if (!hStanDevResult)
+	{
+		MessageBox(m_hWnd, "Failed to create Standard Deviation result box.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd);
+		return;
+	}
+
     hMeanResult = Widget::ResultBox(220, 190, 80, 30, m_hWnd);       // Mean
+	if (!hMeanResult)
+	{
+		MessageBox(m_hWnd, "Failed to create Mean result box.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd);
+		return;
+	}
+
     hSumResult = Widget::ResultBox(220, 230, 80, 30, m_hWnd);        // Sum.
+	if (!hSumResult)
+	{
+		MessageBox(m_hWnd, "Failed to create Sum of Squares result box.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd);
+		return;
+	}
 
     // Buttons.
     hClearBtn = Widget::Button(350, 190, 90, 30, "Clear", m_hWnd, (HMENU)STANDEV_CLEAR_BUTTON);
+    if (!hClearBtn) // Check if the button was created successfully
+    {
+        MessageBox(m_hWnd, "Failed to create Clear button.", "Error", MB_OK | MB_ICONERROR);
+        DestroyWindow(m_hWnd); // Close the window if button creation fails
+        return;
+	}
+
     hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)STANDEV_CLOSE_BUTTON);
+    if (!hCloseBtn) // Check if the button was created successfully
+    {
+        MessageBox(m_hWnd, "Failed to create Close button.", "Error", MB_OK | MB_ICONERROR);
+        DestroyWindow(m_hWnd); // Close the window if button creation fails
+		return;
+	}
 
     // Calculate.
     hCalcBtn = Widget::Button(350, 140, 90, 30, "Calculate", m_hWnd, (HMENU)STANDEV_CALCULATE);
+    if (!hCalcBtn) // Check if the button was created successfully
+    {
+        MessageBox(m_hWnd, "Failed to create Calculate button.", "Error", MB_OK | MB_ICONERROR);
+		DestroyWindow(m_hWnd); // Close the window if button creation fails
+		return;
+    }
+
+    //// Add this instance to the global vector of StanDev instances
+    //stanDevWindows.push_back(this);
+    // 
+    // Set the initial focus to the input box
+	SetFocus(hStanDevInput);
+
 }
 
 void StanDev::StanDevWnd()
@@ -261,7 +337,7 @@ int StanDev::UserIn()
 
 }
 
-std::vector<std::string> StanDev::split(const char* input, char delimiter)
+std::vector<std::string> StanDev::split(const char* input, char delimiter) const
 {
     std::vector<std::string> result;    // Vector of strings.
     //std::vector<std::string> tempVec;   // temporary vector.
@@ -338,7 +414,7 @@ std::vector<std::string> StanDev::split(const char* input, char delimiter)
     return result;
 }
 
-double StanDev::stringToDouble(const std::string& str)
+double StanDev::stringToDouble(const std::string& str) const
 {
     return std::stod(str);
 }
@@ -418,7 +494,7 @@ void StanDev::CalcStanDev(BOOL& eqOpt)
 
 }
 
-std::string StanDev::ToString(double num)
+std::string StanDev::ToString(double num) const
 {
     std::stringstream ss;    // Declare a string stream var.
 
