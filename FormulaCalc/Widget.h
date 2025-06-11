@@ -21,6 +21,10 @@ namespace Widget
 	HWND ResultBox(int posx, int posy, int width, int height, HWND hWnd);
 	HWND MsgBox(int posx, int posy, int width, int height, HWND hWnd, HMENU option);
 
+	HWND ImageStatic(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst);
+	HWND ImageBtn(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option);
+
+
 	HWND CreateWnd(int posx, int posy, int width, int height, const char* name, const char* className, 
 			WNDPROC wndProc, WNDCLASSEX& wcex, HINSTANCE& hInst, int nCmdShow);
 

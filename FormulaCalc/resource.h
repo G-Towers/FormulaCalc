@@ -54,6 +54,7 @@
 #define COMPINT_PRINCA_BUTTON				40046
 #define COMPINT_PRINCI_BUTTON				40047
 #define COMPINT_TIME_BUTTON					40048
+#define VOLUME_IMAGE_BUTTON					40049
 
 // Next default values for new objects
 // 

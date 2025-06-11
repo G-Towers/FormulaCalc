@@ -20,6 +20,10 @@ VolWnd::VolWnd()
 	lowRadius = 0.0;
 	result = 0.0;
 
+	hBitmap = nullptr;
+	hStatBitmap = nullptr;
+	hBtnBitmap = nullptr;
+
 	hLengthLabel = nullptr;
 	hBaseLabel = nullptr;
 	hWidthLabel = nullptr;
@@ -138,9 +142,9 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_CREATE:
-		// Call to the interface function.
-		//Interface::MainInterface(m_hWnd, GetModuleHandle(NULL));
-		VolumeInterface();
+		LoadBitmapImages();	// Load the bitmap images.
+		
+		VolumeInterface();	// Call the volume interface function.
 		//VolTriInterface();
 		break;
 	case WM_SETFOCUS:
@@ -213,11 +217,26 @@ void VolWnd::VolumeWnd()
 	else
 	{
 		CreateWnd("Volume", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
-			0, 250, 250, 480, 350, GetParent(m_hWnd));
+			0, 250, 250, 620, 350, GetParent(m_hWnd));
 		ShowWindow(m_hWnd, SW_SHOW);
 		volWndCreated = 1;
 	}
 
+}
+
+void VolWnd::LoadBitmapImages()
+{
+	hBitmap = (HBITMAP)LoadImage(NULL, "Images\\mickey.bmp",
+		IMAGE_BITMAP, 100, 100, LR_LOADFROMFILE // Set the image size when loading.
+		//| LR_DEFAULTCOLOR | LR_LOADTRANSPARENT | LR_CREATEDIBSECTION
+		);
+
+	//// Check if the bitmap was loaded successfully.
+	if (hBitmap == NULL)
+	{
+		MessageBox(m_hWnd, "Failed to load bitmap image!", "Error", MB_OK | MB_ICONERROR);
+		return;
+	}
 }
 
 void VolWnd::VolumeInterface()
@@ -258,6 +277,15 @@ void VolWnd::VolumeInterface()
 
 	hClearBtn = Widget::Button(320, 190, 90, 30, "Clear", m_hWnd, (HMENU)VOLUME_CLEAR_BUTTON);
 	hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
+
+	// Image button control.
+	hBtnBitmap = Widget::ImageBtn(440, 10, 100, 100, "", m_hWnd, (HMENU)VOLUME_IMAGE_BUTTON);	// Create the image button control.
+
+	// Set the bitmap image to the button control.
+	SendMessage(hBtnBitmap, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+
+	// Set the static image to the control.
+	//SendMessage(hBtnBitmap, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 
 	if (defaultInterface == 0)
 	{

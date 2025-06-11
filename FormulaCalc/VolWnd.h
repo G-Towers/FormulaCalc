@@ -30,6 +30,9 @@ public:
 	void VolumeWnd();
 	// Creates the Volume Window.
 
+	void LoadBitmapImages();
+	// Loads bitmap images.
+
 	void VolumeInterface();
 	// The Calculate Volume Dialog box interface.
 
@@ -129,10 +132,14 @@ private:
 	double length, base, height, width, radius,
 		lowRadius, result;
 
-	static VolWnd* inst;	// To use with InstVolWnd().
+	//static VolWnd* inst;	// To use with InstVolWnd().
 
 	typedef void(VolWnd::* fncPtr)();		// Function Pointer.
 	fncPtr calc;
+
+	HBITMAP hBitmap;	// Bitmap image for loading.
+	HWND hStatBitmap;	// Bitmap static image.
+	HWND hBtnBitmap;	// Bitmap button.
 
 	HWND hComboBoxSelItem;	// ComboBox.
 
