@@ -30,9 +30,6 @@ public:
 	void VolumeWnd();
 	// Creates the Volume Window.
 
-	void LoadBitmapImages();
-	// Loads bitmap images.
-
 	void VolumeInterface();
 	// The Calculate Volume Dialog box interface.
 
@@ -137,7 +134,9 @@ private:
 	typedef void(VolWnd::* fncPtr)();		// Function Pointer.
 	fncPtr calc;
 
-	HBITMAP hBitmap;	// Bitmap image for loading.
+	HBITMAP hBitmap;	// Image handle for loading bitmap image.
+	HBITMAP hBitmap2;
+
 	HWND hStatBitmap;	// Bitmap static image.
 	HWND hBtnBitmap;	// Bitmap button.
 

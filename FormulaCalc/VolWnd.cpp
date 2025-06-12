@@ -21,6 +21,7 @@ VolWnd::VolWnd()
 	result = 0.0;
 
 	hBitmap = nullptr;
+	hBitmap2 = nullptr;
 	hStatBitmap = nullptr;
 	hBtnBitmap = nullptr;
 
@@ -142,10 +143,12 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_CREATE:
-		LoadBitmapImages();	// Load the bitmap images.
-		
+		// Load bitmap images to BITMAP handlers.
+		hBitmap = Widget::LoadBitmapImage(hBtnBitmap, "Images\\mickey.bmp", 100, 100);	// Load the image button bitmap.
+		hBitmap2 = Widget::LoadBitmapImage(hStatBitmap, "Images\\win10Pic.bmp", 200, 125);	// Load the static image bitmap.
+
 		VolumeInterface();	// Call the volume interface function.
-		//VolTriInterface();
+
 		break;
 	case WM_SETFOCUS:
 		SetFocus(InstVolWnd().hLengthBox);
@@ -224,21 +227,6 @@ void VolWnd::VolumeWnd()
 
 }
 
-void VolWnd::LoadBitmapImages()
-{
-	hBitmap = (HBITMAP)LoadImage(NULL, "Images\\mickey.bmp",
-		IMAGE_BITMAP, 100, 100, LR_LOADFROMFILE // Set the image size when loading.
-		//| LR_DEFAULTCOLOR | LR_LOADTRANSPARENT | LR_CREATEDIBSECTION
-		);
-
-	//// Check if the bitmap was loaded successfully.
-	if (hBitmap == NULL)
-	{
-		MessageBox(m_hWnd, "Failed to load bitmap image!", "Error", MB_OK | MB_ICONERROR);
-		return;
-	}
-}
-
 void VolWnd::VolumeInterface()
 {
 	// To get the handle to a dialog box.
@@ -279,10 +267,13 @@ void VolWnd::VolumeInterface()
 	hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
 
 	// Image button control.
-	hBtnBitmap = Widget::ImageBtn(440, 10, 100, 100, "", m_hWnd, (HMENU)VOLUME_IMAGE_BUTTON);	// Create the image button control.
+	hBtnBitmap = Widget::ImageBtn(480, 200, 100, 100, "", m_hWnd, hBitmap, (HMENU)VOLUME_IMAGE_BUTTON);	// Create the image button control.
+
+	// Static Image control.
+	hStatBitmap = Widget::ImageStatic(380, 5, 200, 125, "", m_hWnd, hBitmap2, hInst);	// Create the static image control.
 
 	// Set the bitmap image to the button control.
-	SendMessage(hBtnBitmap, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	//SendMessage(hBtnBitmap, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 
 	// Set the static image to the control.
 	//SendMessage(hBtnBitmap, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);

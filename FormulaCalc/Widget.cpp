@@ -82,6 +82,25 @@ HWND Widget::LLabel(int posx, int posy, int width, int height, const char* text,
 	return Llbl_hWnd;
 }
 
+HWND Widget::LLabelBold(int posx, int posy, int width, int height, const char* text, HWND hWnd)
+{
+	HWND LlblBld_hWnd = CreateWindowEx(WS_EX_LEFT, "static", text,
+		WS_VISIBLE | WS_CHILD,
+		posx, posy, width, height, hWnd, nullptr, nullptr, nullptr);
+	HFONT hfVol = CreateFont(16, 5, 0, 0, FW_BOLD, 0, 0, 0,
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "MS Sans Serif");
+
+	// Error handling.
+	if (!LlblBld_hWnd)
+	{
+		MessageBox(NULL, "Failed to create left-aligned bold label.", "Error", MB_OK | MB_ICONERROR);
+		LlblBld_hWnd = nullptr; // Set to nullptr if creation fails.
+		return LlblBld_hWnd; // Return nullptr if creation fails.
+	}
+
+	return LlblBld_hWnd;
+}
+
 HWND Widget::GroupBox(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst)
 {
 	HWND GrpBx_hWnd = CreateWindow(
@@ -272,7 +291,7 @@ HWND Widget::MsgBox(int posx, int posy, int width, int height, HWND hWnd, HMENU 
 	return Msg_hWnd;
 }
 
-HWND Widget::ImageStatic(int posx, int posy, int width, int height, const char* text, HWND hWnd, HINSTANCE hInst)
+HWND Widget::ImageStatic(int posx, int posy, int width, int height, const char* text, HWND hWnd, HBITMAP hImage, HINSTANCE hInst)
 {
 	HWND ImgSt_hWnd = CreateWindow(
 		"static",
@@ -288,10 +307,12 @@ HWND Widget::ImageStatic(int posx, int posy, int width, int height, const char* 
 		return ImgSt_hWnd; // Return nullptr if creation fails.
 	}
 
+	SendMessage(ImgSt_hWnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
+
 	return ImgSt_hWnd;
 }
 
-HWND Widget::ImageBtn(int posx, int posy, int width, int height, const char* text, HWND hWnd, HMENU option)
+HWND Widget::ImageBtn(int posx, int posy, int width, int height, const char* text, HWND hWnd, HBITMAP hImage, HMENU option)
 {
 	HWND ImgBtn_hWnd = CreateWindow(
 		"BUTTON",
@@ -307,7 +328,27 @@ HWND Widget::ImageBtn(int posx, int posy, int width, int height, const char* tex
 		return ImgBtn_hWnd; // Return nullptr if creation fails.
 	}
 
+	SendMessage(ImgBtn_hWnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hImage);
+
 	return ImgBtn_hWnd;
+}
+
+HBITMAP Widget::LoadBitmapImage(HWND hWnd, const char* fileName, int width, int height)
+{
+	HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, fileName, IMAGE_BITMAP, width, height, 
+		LR_LOADFROMFILE| LR_DEFAULTCOLOR | LR_LOADTRANSPARENT |LR_CREATEDIBSECTION
+	);
+
+	if (hBitmap == NULL)
+	{
+		MessageBox(hWnd, "Failed to load image.", "Error", MB_OK | MB_ICONERROR);
+		return hBitmap;
+	}
+
+	// Set the bitmap to the static control
+	SendMessage(hWnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+
+	return hBitmap;
 }
 
 HWND Widget::CreateWnd(int posx, int posy, int width, int height, const char* name, const char* className, 
