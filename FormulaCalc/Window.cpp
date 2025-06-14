@@ -96,15 +96,15 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 
 		case ID_ALGEBRA_QUADRATICFORMULA:
-			QuadForm::quadFormObj.QuadFormWnd();
+			QuadForm::InstQuadFormWnd().QuadFormWnd();
 			break;
 
 		case ID_CALCULUS_DIFFRENTIATION:
-			Diff::diffObj.DiffWnd();
+			Diff::InstDiffWnd().DiffWnd();
 			break;
 
 		case ID_CALCULUS_INTEGRATION:
-			Integrate::integrateObj.IntegrateWnd();
+			Integrate::InstIntegrateWnd().IntegrateWnd();
 			break;
 
 		case ID_FINANCE_COMPOUNDINTEREST:
@@ -112,7 +112,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_FINANCE_LOAN:
-			FinLoan::finLoanObj.FinLoanWnd();
+			FinLoan::InstFinLoanWnd().FinLoanWnd();
 			break;
 
 		case ID_FILE_EXIT:

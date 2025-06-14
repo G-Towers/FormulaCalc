@@ -1,13 +1,16 @@
 // Integration
 
 #include "Integrate.h"
-Integrate Integrate::integrateObj;
-Integrate* Integrate::inst = nullptr;
+
 BOOL Integrate::integrateWndCreated = 0;
 
 Integrate::Integrate()
-{
+    :
+    hInst(nullptr),
+    defaultInterface(false),
+    hBtnClose(nullptr)
 
+{
 }
 
 Integrate::~Integrate()
@@ -25,17 +28,24 @@ LRESULT Integrate::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         switch (wmId)
         {
+        case INTEGRATE_CLOSE_BTN:
+            integrateWndCreated = 0;
+            UnregisterClass("IntegrateClass", GetModuleHandle(NULL));
+            DestroyWindow(m_hWnd);
 
+            return 0;
         }
 
         break;
 
     case WM_CREATE:
+        IntegrateInterface();
+        break;
 
-        break;
     case WM_SETFOCUS:
-        SetFocus(integrateObj.m_hWnd);
+        SetFocus(m_hWnd);
         break;
+
     case WM_DESTROY:
         integrateWndCreated = 0;
         UnregisterClass("DerivClass", hInst);
@@ -54,27 +64,25 @@ LRESULT Integrate::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 
     }
+
     return (LRESULT)DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 }
 
 Integrate& Integrate::InstIntegrateWnd()
 {
-    if (!inst)
-    {
-        inst = new Integrate();
-    }
-
-    return *inst;
+    static Integrate inst;
+    return inst;
 }
 
 HINSTANCE Integrate::GetInstance() noexcept
 {
-    return integrateObj.hInst;
+    return InstIntegrateWnd().hInst;
 }
 
 void Integrate::IntegrateInterface()
 {
-
+    // Buttons.
+    hBtnClose = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)INTEGRATE_CLOSE_BTN);
 }
 
 void Integrate::IntegrateWnd()

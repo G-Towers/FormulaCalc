@@ -6,16 +6,24 @@
 
 class FinLoan : public BaseWindow<FinLoan>
 {
-public:
+private:
 	FinLoan();
+	~FinLoan();
+
+public:
 
 	FinLoan(const FinLoan&) = delete;
 	FinLoan& operator=(const FinLoan&) = delete;
 
-	~FinLoan();
 
 	const char* ClassName() const { return "FinLoanClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	static FinLoan& InstFinLoanWnd();
+	// Singleton to instantiate an object only once.
+
+	static HINSTANCE GetInstance() noexcept;
+	// Gets the handle to the instance.
 
 	void FinLoanWnd();
 	// Creates the Finance Loan Window.
@@ -93,12 +101,10 @@ public:
 	 
 	std::map<HWND, std::string> msgBxStrMap;	// Map to associate HWND with strings.
 	static BOOL flWndCreated;	// Flag for window created.
-	static FinLoan finLoanObj;
 
 private:
 	HINSTANCE hInst;
-
-	static FinLoan* inst;	// To use with InstFinLoanWnd().
+	bool defaultInterface;	// Flag for default interface (initial calculation window).
 
 	typedef void(FinLoan::*fncPtr)();		// Function Pointer.
 	fncPtr calc;
@@ -108,7 +114,7 @@ private:
 	double monthRate;	// Monthly rate.
 	double rate;		// Annual rate.
 	double monthPay;	// Monthly payment.
-	int months;			// Number of monthly payments.
+	int months;		// Number of monthly payments.
 	double result;		// Final result.
 
 	// Char arrays.

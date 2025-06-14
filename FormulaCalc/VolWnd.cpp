@@ -5,54 +5,52 @@
 
 BOOL VolWnd::volWndCreated = 0;
 
-const double PI = 3.141592654;
-
-MSG msg;
-
 VolWnd::VolWnd()
+	:
+	defaultInterface(0),
+	length(0.0), 
+	base(0.0), 
+	height(0.0),
+	width(0.0), 
+	radius(0.0), 
+	lowRadius(0.0), 
+	result(0.0),
+
+	hBitmap(nullptr), 
+	hBitmap2(nullptr), 
+	hStatBitmap(nullptr), 
+	hBtnBitmap(nullptr),
+
+	hLengthLabel(nullptr), 
+	hBaseLabel(nullptr), 
+	hWidthLabel(nullptr),
+	hHeightLabel(nullptr), 
+	hRadiusLabel(nullptr), 
+	hLowRadiusLabel(nullptr), 
+	hResultLabel(nullptr),
+
+	hComboBoxSelItem(nullptr),
+
+	hLengthBox(nullptr),
+	hBaseBox(nullptr),
+	hWidthBox(nullptr),
+	hHeightBox(nullptr),
+	hRadiusBox(nullptr),
+	hLowRadiusBox(nullptr),
+	hResultBox(nullptr),
+
+	hTriCalcBtn(nullptr),
+	hRectCalcBtn(nullptr),
+	hSphereCalcBtn(nullptr),
+	hCylinderCalcBtn(nullptr),
+	hConeCalcBtn(nullptr),
+	hPyramidCalcBtn(nullptr),
+
+	hClearBtn(nullptr),
+	hCloseBtn(nullptr)
+
 {
-	defaultInterface = 0;
-	length = 0.0;
-	base = 0.0;
-	height = 0.0;
-	width = 0.0;
-	radius = 0.0;
-	lowRadius = 0.0;
-	result = 0.0;
 
-	hBitmap = nullptr;
-	hBitmap2 = nullptr;
-	hStatBitmap = nullptr;
-	hBtnBitmap = nullptr;
-
-	hLengthLabel = nullptr;
-	hBaseLabel = nullptr;
-	hWidthLabel = nullptr;
-	hHeightLabel = nullptr;
-	hRadiusLabel = nullptr;
-	hLowRadiusLabel = nullptr;
-	hResultLabel = nullptr;
-
-	hComboBoxSelItem = nullptr;
-
-	hLengthBox = nullptr;
-	hBaseBox = nullptr;
-	hWidthBox = nullptr;
-	hHeightBox = nullptr;
-	hRadiusBox = nullptr;
-	hLowRadiusBox = nullptr;
-	hResultBox = nullptr;
-
-	hTriCalcBtn = nullptr;
-	hRectCalcBtn = nullptr;
-	hSphereCalcBtn = nullptr;
-	hCylinderCalcBtn = nullptr;
-	hConeCalcBtn = nullptr;
-	hFrusConeCalcBtn = nullptr;
-	hPyramidCalcBtn = nullptr;
-
-	hClearBtn = nullptr;
-	hCloseBtn = nullptr;
 }
 
 VolWnd::~VolWnd()

@@ -2,35 +2,40 @@
 
 #include "QuadForm.h"
 
-QuadForm QuadForm::quadFormObj;
-QuadForm* QuadForm::inst = nullptr;
 BOOL QuadForm::qfWndCreated = 0;
 
 QuadForm::QuadForm()
+    :
+	hInst(nullptr),
+	defaultInterface(false),
+
+    dblA(0.0), 
+    dblB(0.0), 
+    dblC(0.0),
+    dblDiscrim(0.0), 
+    dblResultPlus(0.0), 
+    dblResultMinus(0.0),
+
+    hStanFormEq(nullptr), 
+    hALbl(nullptr), 
+    hBLbl(nullptr), 
+    hCLbl(nullptr),
+    hResultLblPlus(nullptr), 
+    hResultLblMinus(nullptr),
+
+    hAIn(nullptr), 
+    hBIn(nullptr), 
+    hCIn(nullptr),
+
+    hQuadFormResultPlus(nullptr), 
+    hQuadFormResultMinus(nullptr),
+
+    hClearBtn(nullptr), 
+    hCloseBtn(nullptr), 
+    hCalcBtn(nullptr)
+	
 {
-    hInst = GetModuleHandle(NULL);
 
-    dblA = 0.0;
-    dblB = 0.0;
-    dblC = 0.0;
-    dblDiscrim = 0.0;
-    dblResultPlus = 0.0;
-    dblResultMinus = 0.0;
-
-    hStanFormEq = nullptr;
-    hALbl = nullptr;
-    hBLbl = nullptr;
-    hCLbl = nullptr;
-    hResultLblPlus = nullptr;
-    hResultLblMinus = nullptr;
-    hAIn = nullptr;
-    hBIn = nullptr;
-    hCIn = nullptr;
-    hClearBtn = nullptr;
-    hCloseBtn = nullptr;
-    hCalcBtn = nullptr;
-    hQuadFormResultPlus = nullptr;
-    hQuadFormResultMinus = nullptr;
 }
 
 QuadForm::~QuadForm()
@@ -95,6 +100,17 @@ LRESULT QuadForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     }
     return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+}
+
+QuadForm& QuadForm::InstQuadFormWnd()
+{
+    static QuadForm inst;
+    return inst;
+}
+
+HINSTANCE QuadForm::GetInstance() noexcept
+{
+    return InstQuadFormWnd().hInst;
 }
 
 void QuadForm::QuadFormWnd()

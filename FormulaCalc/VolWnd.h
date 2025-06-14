@@ -126,10 +126,10 @@ private:
 	HINSTANCE hInst;
 	bool defaultInterface;	// Default interface flag.
 
+	const double PI = 3.141592654;
 	double length, base, height, width, radius,
 		lowRadius, result;
 
-	//static VolWnd* inst;	// To use with InstVolWnd().
 
 	typedef void(VolWnd::* fncPtr)();		// Function Pointer.
 	fncPtr calc;
@@ -138,7 +138,7 @@ private:
 	HBITMAP hBitmap2;
 
 	HWND hStatBitmap;	// Bitmap static image.
-	HWND hBtnBitmap;	// Bitmap button.
+	HWND hBtnBitmap;	// Bitmap button image.
 
 	HWND hComboBoxSelItem;	// ComboBox.
 

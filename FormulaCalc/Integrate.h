@@ -5,13 +5,15 @@
 
 class Integrate : public BaseWindow<Integrate>
 {
-public:
+private:
 	Integrate();
+	~Integrate();
 
+public:
+	
 	Integrate(const Integrate&) = delete;
 	Integrate& operator=(const Integrate&) = delete;
 
-	~Integrate();
 
 	const char* ClassName() const { return "IntegrateClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -37,13 +39,16 @@ public:
 	int UserIn();
 	// User input and validation.
 
+	// Map to associate HWND with error strings. Used for input validation.
+	std::map<HWND, std::string> msgBxStrMap;
+
 	static BOOL integrateWndCreated;	// Flag for window created.
-	static Integrate integrateObj;
+
 
 private:
-	HINSTANCE hInst;
 
-	static Integrate* inst;	// To use with InstDiffWnd().
+	HINSTANCE hInst;
+	bool defaultInterface;	// Flag for default interface (initial calculation window).
 
 	// Variables.
 
@@ -54,4 +59,6 @@ private:
 	// Input/Result.
 
 	// Buttons.
+	HWND hBtnClose;
+
 };

@@ -2,13 +2,16 @@
 
 #include "Diff.h"
 
-Diff Diff::diffObj;
-Diff* Diff::inst = nullptr;
 BOOL Diff::diffWndCreated = 0;
 
 Diff::Diff()
-{
+    :
+    hInst(nullptr),
+    defaultInterface(false),
+    hBtnClose(nullptr)
 
+
+{
 }
 
 Diff::~Diff()
@@ -26,17 +29,24 @@ LRESULT Diff::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         switch (wmId)
         {
+        case DIFF_CLOSE_BTN:
+            diffWndCreated = 0;
+            UnregisterClass("DiffClass", GetModuleHandle(NULL));
+            DestroyWindow(m_hWnd);
 
+            return 0;
         }
 
         break;
 
     case WM_CREATE:
+        DiffInterface();
+        break;
 
-        break;
     case WM_SETFOCUS:
-        SetFocus(diffObj.m_hWnd);
+        SetFocus(m_hWnd);
         break;
+
     case WM_DESTROY:
         diffWndCreated = 0;
         UnregisterClass("DerivClass", hInst);
@@ -44,6 +54,7 @@ LRESULT Diff::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         //PostQuitMessage(0);
         return 0;
+
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -55,28 +66,26 @@ LRESULT Diff::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 
     }
+
 	return (LRESULT)DefWindowProc(m_hWnd, uMsg, wParam, lParam);
 
 }
 
 Diff& Diff::InstDiffWnd()
 {
-    if (!inst)
-    {
-        inst = new Diff();
-    }
-
-    return *inst;
+    static Diff inst;
+    return inst;
 }
 
 HINSTANCE Diff::GetInstance() noexcept
 {
-    return diffObj.hInst;
+    return InstDiffWnd().hInst;
 }
 
 void Diff::DiffInterface()
 {
-
+    // Buttons.
+    hBtnClose = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)DIFF_CLOSE_BTN);
 }
 
 void Diff::DiffWnd()

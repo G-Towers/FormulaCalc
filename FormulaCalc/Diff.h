@@ -1,20 +1,20 @@
 // Differentiation calculations.
 
 #pragma once
-
 #include "Window.h"
 
 class Diff : public BaseWindow<Diff>
 {
-public:
+private:
 	Diff();
+	~Diff();
+
+public:
 
 	Diff(const Diff&) = delete;
 	Diff& operator=(const Diff&) = delete;
 
-	~Diff();
-
-	const char* ClassName() const { return "DerivClass"; }
+	const char* ClassName() const { return "DiffClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	static Diff& InstDiffWnd();
@@ -38,16 +38,17 @@ public:
 	int UserIn();
 	// User input and validation.
 
-
+	// Map to associate HWND with error strings. Used for input validation.
+	std::map<HWND, std::string> msgBxStrMap;
 
 	static BOOL diffWndCreated;	// Flag for window created.
-	static Diff diffObj;
+
 
 private:
 
 	HINSTANCE hInst;
+	bool defaultInterface;	// Flag for default interface (initial calculation window).
 
-	static Diff* inst;	// To use with InstDiffWnd().
 
 	// Variables.
 
@@ -58,7 +59,7 @@ private:
 	// Input/Result.
 
 	// Buttons.
-
+	HWND hBtnClose;
 
 };
 

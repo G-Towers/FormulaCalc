@@ -3,37 +3,39 @@
 
 #include "FinLoan.h"
 
-FinLoan FinLoan::finLoanObj;
-FinLoan* FinLoan::inst = nullptr;
 BOOL FinLoan::flWndCreated = 0;
 
 FinLoan::FinLoan()
+    :
+    hInst(nullptr),
+    defaultInterface(false),
+
+	principal(0.0), 
+    monthRate(0.0), 
+    rate(0.0), 
+    monthPay(0.0), 
+    months(0),
+	//result(0.0),
+
+	hLblMonthPay(nullptr),
+    hLblAmount(nullptr),
+    hLblRate(nullptr),
+    hLblMonths(nullptr),
+    hLblResult(nullptr),
+
+    hInMonthPay(nullptr),
+    hInAmount(nullptr),
+    hInRate(nullptr),
+    hInMonths(nullptr),
+
+    hRsltFinLoan(nullptr),
+
+    hBtnCalc(nullptr),
+    hBtnClear(nullptr),
+	hBtnClose(nullptr)
+
 {
-    hInst = GetModuleHandle(NULL);
 
-    principal = 0.0;
-    monthRate = 0.0;
-    rate = 0.0;
-    monthPay = 0.0;
-    months = 0;
-    //result = 0.0;
-
-    hLblMonthPay = nullptr;
-    hLblAmount = nullptr;
-    hLblRate = nullptr;
-    hLblMonths = nullptr;
-    hLblResult = nullptr;
-
-    hInMonthPay = nullptr;
-    hInAmount = nullptr;
-    hInRate = nullptr;
-    hInMonths = nullptr;
-
-    hRsltFinLoan = nullptr;
-
-    hBtnCalc = nullptr;
-    hBtnClear = nullptr;
-    hBtnClose = nullptr;
 }
 
 FinLoan::~FinLoan()
@@ -55,22 +57,22 @@ LRESULT FinLoan::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
         case FINLOAN_CALC_AMOUNT_BUTTON:
             //calc = &FinLoan::CalcFinLoanAmount;
-            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanPrincipal);
+            FinLoanCalcThunk(this, &FinLoan::CalcFinLoanPrincipal);
             break;
 
         case FINLOAN_CALC_RATE_BUTTON:
             //calc = &FinLoan::CalcFinLoanRate;
-            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanRate);
+            FinLoanCalcThunk(this, &FinLoan::CalcFinLoanRate);
             break;
 
         case FINLOAN_CALC_MONTHS_BUTTON:
             //calc = &FinLoan::CalcFinLoanMonths;
-            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanMonths);
+            FinLoanCalcThunk(this, &FinLoan::CalcFinLoanMonths);
             break;
 
         case FINLOAN_CALC_PAYMENT_BUTTON:
             //calc = &FinLoan::CalcFinLoanPayment;
-            FinLoanCalcThunk(&finLoanObj, &FinLoan::CalcFinLoanPayment);
+            FinLoanCalcThunk(this, &FinLoan::CalcFinLoanPayment);
             break;
 
         case FINLOAN_CLEAR_BUTTON:
@@ -114,6 +116,12 @@ LRESULT FinLoan::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     }
     return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+}
+
+FinLoan& FinLoan::InstFinLoanWnd()
+{
+    static FinLoan inst;
+    return inst;
 }
 
 void FinLoan::FinLoanWnd()

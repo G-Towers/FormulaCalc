@@ -56,6 +56,10 @@
 #define COMPINT_TIME_BUTTON					40048
 #define VOLUME_IMAGE_BUTTON					40049
 
+#define INTEGRATE_CLOSE_BTN					40050
+#define DIFF_CLOSE_BTN						40051
+
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
