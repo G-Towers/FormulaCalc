@@ -7,6 +7,16 @@
 
 namespace Widget
 {
+	// Define the dialog data structure properly
+	struct DialogData
+	{
+		const char* title; // Title of the dialog.
+		const char* message;
+		const char* imagePath;
+		int width;
+		int height;
+	};
+
 	// label controls.
 	HWND RLabel(int posx, int posy, int width, int height, const char* text, HWND hWnd);
 	HWND RLabelBold(int posx, int posy, int width, int height, const char* text, HWND hWnd);
@@ -38,8 +48,16 @@ namespace Widget
 	HWND ImageBtn(int posx, int posy, int width, int height, const char* text, HWND hWnd, HBITMAP hImage, HMENU option);
 	HBITMAP LoadBitmapImage(HWND hWnd, const char* fileName, int width, int height);
 
+	// Window creation.
 	HWND CreateWnd(int posx, int posy, int width, int height, const char* name, const char* className, 
 			WNDPROC wndProc, WNDCLASSEX& wcex, HINSTANCE& hInst, int nCmdShow);
+
+	// Add this to Widget.h
+	INT_PTR StaticModalDialog(HWND hParent, const char* title, const char* message,
+		const char* imagePath = nullptr,
+		int width = 400, int height = 200);
+
+	//INT_PTR SmplModlDlg(HWND hParent, const char* title, const char* message);
 
 };
 

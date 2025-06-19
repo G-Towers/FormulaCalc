@@ -15,6 +15,59 @@ HINSTANCE hInst = GetModuleHandle(NULL);
 // Global vector to hold StanDev windows.
 std::vector<StanDev*> stanDevWindows;	// Holds multiple instances of StanDev windows.
 
+// Dialog procedure for the modal dialog
+INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	static Widget::DialogData* pDialogData = nullptr;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+	{
+		// Store the dialog data pointer
+		pDialogData = reinterpret_cast<Widget::DialogData*>(lParam);
+		if (!pDialogData) return FALSE;
+
+		// Set the dialog title.
+		SetWindowText(hDlg, pDialogData->title);
+
+		// Create controls using the stored data.
+		Widget::LLabel(40, 25, pDialogData->width - 40, pDialogData->height - 100,
+			pDialogData->message, hDlg);
+
+		if (pDialogData->imagePath) 
+		{
+			// Load the bitmap image from the specified path.
+			HBITMAP hBitmap = Widget::LoadBitmapImage(hDlg, pDialogData->imagePath, 200, 125);
+			if (hBitmap) 
+			{
+				// Create a static control to display the image.
+				Widget::ImageStatic(80, pDialogData->height - 70, 200, 125, "",
+					hDlg, hBitmap, GetModuleHandle(NULL));
+			}
+		}
+
+		Widget::Button((pDialogData->width + 130), pDialogData->height + 90,
+			80, 30, "OK", hDlg, (HMENU)IDOK);
+		return TRUE;
+	}
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return TRUE;
+		}
+		break;
+
+	case WM_CLOSE:
+		EndDialog(hDlg, IDCANCEL);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -76,8 +129,13 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case ID_HELP_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), m_hWnd, About);
+		{
+			Widget::StaticModalDialog(m_hWnd, "About This Window...", "Your message written here.", 
+					"Images\\win10Pic.bmp", 250, 150);
+
+			//DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), m_hWnd, About);
 			break;
+		}
 
 		case ID_HELP_INFO:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG2), m_hWnd, Info);

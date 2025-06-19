@@ -1,7 +1,7 @@
 // Widget.cpp
 
 #include "Widget.h"
-
+#include <tchar.h>
 
 HWND Widget::RLabel(int posx, int posy, int width, int height, const char* text, HWND hWnd)
 {
@@ -346,7 +346,7 @@ HBITMAP Widget::LoadBitmapImage(HWND hWnd, const char* fileName, int width, int 
 	}
 
 	// Set the bitmap to the static control
-	SendMessage(hWnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	//SendMessage(hWnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 
 	return hBitmap;
 }
@@ -404,6 +404,70 @@ HWND Widget::CreateWnd(int posx, int posy, int width, int height, const char* na
 	return hWnd;
 }
 
+INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* message,
+	const char* imagePath, int width, int height)
+{
+	// Register dialog class
+	static bool classRegistered = false;
+	if (!classRegistered)
+	{
+		WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
+		wcex.lpfnWndProc = DefDlgProc;
+		wcex.hInstance = GetModuleHandle(NULL);
+		wcex.lpszClassName = "StaticModalDialogClass";
+		wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
+		wcex.style = CS_DBLCLKS;
+		RegisterClassEx(&wcex);
+		classRegistered = true;
+	}
+
+	// Create dialog template in memory
+	DLGTEMPLATE* pDlgTemplate;
+
+	//LPWORD lpw;
+	//LPWSTR lpwsz;
+	//int nchar;
+
+	pDlgTemplate = (DLGTEMPLATE*)GlobalAlloc(GPTR, sizeof(DLGTEMPLATE));
+
+	if (!pDlgTemplate) 
+		return -1;
+
+	// Define dialog template
+	pDlgTemplate->style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_CENTER;
+	pDlgTemplate->dwExtendedStyle = 0;
+	pDlgTemplate->cdit = 0;
+	pDlgTemplate->x = 0;
+	pDlgTemplate->y = 0;
+	pDlgTemplate->cx = width;
+	pDlgTemplate->cy = height;
+
+	// Dialog data
+	struct 
+	{
+		const char* title;
+		const char* message;
+		const char* imagePath;
+		int width;
+		int height;
+	} 
+	
+	dlgData = { title, message, imagePath, width, height };	// Initialize dialog data.
+
+	// Create and show the dialog
+	INT_PTR result = DialogBoxIndirectParam(
+		GetModuleHandle(NULL),
+		pDlgTemplate,
+		hParent,
+		VolWndDlgProc,
+		(LPARAM)&dlgData
+	);
+
+	GlobalFree(pDlgTemplate);	// Free the dialog template memory.
+
+	return result;
+
+}
 
 
 

@@ -28,6 +28,7 @@ inline void SafeDestroyWindow(HWND& hwnd)
 // Dialog Box Procs
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK Info(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 template <class DERIVED_TYPE>
 class BaseWindow

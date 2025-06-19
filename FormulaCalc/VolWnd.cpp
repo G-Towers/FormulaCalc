@@ -143,7 +143,7 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		// Load bitmap images to BITMAP handlers.
 		hBitmap = Widget::LoadBitmapImage(hBtnBitmap, "Images\\mickey.bmp", 100, 100);	// Load the image button bitmap.
-		hBitmap2 = Widget::LoadBitmapImage(hStatBitmap, "Images\\win10Pic.bmp", 200, 125);	// Load the static image bitmap.
+		//hBitmap2 = Widget::LoadBitmapImage(hStatBitmap, "Images\\win10Pic.bmp", 200, 125);	// Load the static image bitmap.
 
 		VolumeInterface();	// Call the volume interface function.
 
@@ -265,10 +265,10 @@ void VolWnd::VolumeInterface()
 	hCloseBtn = Widget::Button(350, 260, 90, 30, "Close", m_hWnd, (HMENU)VOLUME_CLOSE_BUTTON);
 
 	// Image button control.
-	hBtnBitmap = Widget::ImageBtn(480, 200, 100, 100, "", m_hWnd, hBitmap, (HMENU)VOLUME_IMAGE_BUTTON);	// Create the image button control.
+	hBtnBitmap = Widget::ImageBtn(420, 20, 100, 100, "", m_hWnd, hBitmap, (HMENU)VOLUME_IMAGE_BUTTON);	// Create the image button control.
 
 	// Static Image control.
-	hStatBitmap = Widget::ImageStatic(380, 5, 200, 125, "", m_hWnd, hBitmap2, hInst);	// Create the static image control.
+	//hStatBitmap = Widget::ImageStatic(380, 5, 200, 125, "", m_hWnd, hBitmap2, hInst);	// Create the static image control.
 
 	// Set the bitmap image to the button control.
 	//SendMessage(hBtnBitmap, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
