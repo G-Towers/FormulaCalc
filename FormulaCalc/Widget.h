@@ -53,7 +53,7 @@ namespace Widget
 			WNDPROC wndProc, WNDCLASSEX& wcex, HINSTANCE& hInst, int nCmdShow);
 
 	// Static modal dialog creation.
-	INT_PTR StaticModalDialog(HWND hParent, const char* title, const char* message,
+	INT_PTR StaticModalDialog(HWND hParent, DLGPROC proc, const char* title, const char* message,
 		const char* imagePath = nullptr,
 		int width = 400, int height = 200);
 

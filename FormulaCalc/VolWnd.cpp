@@ -137,6 +137,11 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(m_hWnd);
 			//UnregisterClass("VolWndClass", GetModuleHandle(NULL));
 			break;
+		case BTN_VOLWND_TRIPRSM:
+			Widget::StaticModalDialog(m_hWnd, &VolWnd::VolWndDlgProc, "About This Window...", "Your message written here.",
+				"Images\\win10Pic.bmp", 250, 150);
+			break;
+
 		}
 	}
 	break;
@@ -202,6 +207,59 @@ LRESULT CALLBACK VolWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 LRESULT VolWnd::VolWndInputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
+}
+
+INT_PTR VolWnd::VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	static Widget::DialogData* pDialogData = nullptr;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+	{
+		// Store the dialog data pointer
+		pDialogData = reinterpret_cast<Widget::DialogData*>(lParam);
+		if (!pDialogData)
+			return FALSE;
+
+		// Set the dialog title.
+		SetWindowText(hDlg, pDialogData->title);
+
+		// Create controls using the stored data.
+		Widget::LLabel(40, 25, pDialogData->width - 40, pDialogData->height - 100,
+			pDialogData->message, hDlg);
+
+		if (pDialogData->imagePath)
+		{
+			// Load the bitmap image from the specified path.
+			HBITMAP hBitmap = Widget::LoadBitmapImage(hDlg, pDialogData->imagePath, 200, 125);
+			if (hBitmap)
+			{
+				// Create a static control to display the image.
+				Widget::ImageStatic(80, pDialogData->height - 70, 200, 125, "",
+					hDlg, hBitmap, GetModuleHandle(NULL));
+			}
+		}
+
+		Widget::Button((pDialogData->width + 130), pDialogData->height + 90,
+			80, 30, "OK", hDlg, (HMENU)IDOK);
+		return TRUE;
+	}
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return TRUE;
+		}
+		break;
+
+	case WM_CLOSE:
+		EndDialog(hDlg, IDCANCEL);
+		return TRUE;
+	}
+	return FALSE;
+
 }
 
 VolWnd& VolWnd::InstVolWnd()

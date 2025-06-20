@@ -375,6 +375,7 @@ HWND Widget::CreateWnd(int posx, int posy, int width, int height, const char* na
 	// Use Windows's default colour as the background of the window
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 
+	// Register the window class, and check for errors.
 	if (!RegisterClassEx(&wcex))
 	{
 		throw GTWND_LAST_EXCEPT();
@@ -401,16 +402,16 @@ HWND Widget::CreateWnd(int posx, int posy, int width, int height, const char* na
 		throw GTWND_LAST_EXCEPT();
 	}
 
-	// Make the window visible on the screen
+	// Make the window visible on the screen.
 	ShowWindow(hWnd, nCmdShow);
 
 	return hWnd;
 }
 
-INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* message,
+INT_PTR Widget::StaticModalDialog(HWND hParent, DLGPROC proc, const char* title, const char* message,
 	const char* imagePath, int width, int height)
 {
-	// Register dialog class
+	// Register dialog class.
 	static bool classRegistered = false;
 	if (!classRegistered)
 	{
@@ -424,19 +425,21 @@ INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* m
 		classRegistered = true;
 	}
 
-	// Create dialog template in memory
+	// Create dialog template in memory.
 	DLGTEMPLATE* pDlgTemplate;
 
 	//LPWORD lpw;
 	//LPWSTR lpwsz;
 	//int nchar;
 
+	// Allocate memory for the dialog template.
 	pDlgTemplate = (DLGTEMPLATE*)GlobalAlloc(GPTR, sizeof(DLGTEMPLATE));
 
+	// Check if memory allocation was successful.
 	if (!pDlgTemplate) 
 		return -1;
 
-	// Define dialog template
+	// Define dialog template.
 	pDlgTemplate->style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME; // | DS_CENTER;
 	pDlgTemplate->dwExtendedStyle = 0;
 	pDlgTemplate->cdit = 0;
@@ -445,8 +448,8 @@ INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* m
 	pDlgTemplate->cx = width;
 	pDlgTemplate->cy = height;
 	
-	// Initialize dialog data.
-	DialogData dlgData = 
+	// Initialize dialog data using struct in widget.h.
+	Widget::DialogData dlgData = 
 	{ 
 		title, 
 		message, 
@@ -455,12 +458,12 @@ INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* m
 		height 
 	};
 
-	// Create and show the dialog
+	// Create and show the dialog.
 	INT_PTR result = DialogBoxIndirectParam(
 		GetModuleHandle(NULL),
 		pDlgTemplate,
 		hParent,
-		VolWndDlgProc,
+		proc,
 		(LPARAM)&dlgData
 	);
 

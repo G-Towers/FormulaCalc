@@ -27,6 +27,9 @@ public:
 	// Each input box is subclassed and intercepted by the TAB key in their respective window procedure.
 	// This allows the focus to be set manually to the next input box.
 
+	static INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	// Dialog procedure for the modal dialog box used in the Volume Window.
+
 	static VolWnd& InstVolWnd();
 	// Singleton to instantiate an object only once.
 
