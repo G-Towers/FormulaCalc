@@ -28,7 +28,7 @@ inline void SafeDestroyWindow(HWND& hwnd)
 // Dialog Box Procs
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK Info(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+// INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 template <class DERIVED_TYPE>
 class BaseWindow
@@ -132,7 +132,8 @@ public:
 
 	void CreateWnd(
 		const char* lpWindowName, DWORD dwStyle, DWORD dwExStyle = 0,
-		int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int nWidth = CW_USEDEFAULT, int nHeight = CW_USEDEFAULT,
+		int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, 
+		int nWidth = CW_USEDEFAULT, int nHeight = CW_USEDEFAULT,
 		HWND hWndParent = 0, HMENU hMenu = 0 )
 
 	{
@@ -146,7 +147,10 @@ public:
 		wc.hIcon = NULL;
 		wc.hCursor = nullptr;
 		wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-		wc.lpszMenuName = MAKEINTRESOURCE(hMenu);
+
+		wc.lpszMenuName = (hMenu != nullptr && IS_INTRESOURCE(hMenu))
+							? reinterpret_cast<LPCSTR>(hMenu) : nullptr;
+
 		wc.lpszClassName = ClassName();
 		wc.hIconSm = NULL;
 		RegisterClassEx(&wc);

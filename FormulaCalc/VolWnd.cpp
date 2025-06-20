@@ -281,7 +281,7 @@ void VolWnd::VolumeWnd()
 	else
 	{
 		CreateWnd("Volume", WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE,
-			0, 250, 250, 620, 350, GetParent(m_hWnd));
+			0, 250, 250, 560, 350, GetParent(m_hWnd));
 		ShowWindow(m_hWnd, SW_SHOW);
 		volWndCreated = 1;
 	}
