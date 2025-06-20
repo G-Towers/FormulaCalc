@@ -20,6 +20,12 @@ public:
 
 	const char* ClassName() const { return "VolWndClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	// Main window procedure for VolWnd class.
+
+	static LRESULT CALLBACK VolWndInputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	// Subclass input box procedure for handling input messages to enable TAB key navigation.
+	// Each input box is subclassed and intercepted by the TAB key in their respective window procedure.
+	// This allows the focus to be set manually to the next input box.
 
 	static VolWnd& InstVolWnd();
 	// Singleton to instantiate an object only once.

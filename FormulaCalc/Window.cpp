@@ -26,7 +26,8 @@ INT_PTR CALLBACK VolWndDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	{
 		// Store the dialog data pointer
 		pDialogData = reinterpret_cast<Widget::DialogData*>(lParam);
-		if (!pDialogData) return FALSE;
+		if (!pDialogData) 
+			return FALSE;
 
 		// Set the dialog title.
 		SetWindowText(hDlg, pDialogData->title);

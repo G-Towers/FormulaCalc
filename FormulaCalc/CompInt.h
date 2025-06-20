@@ -17,8 +17,6 @@ public:
 	CompInt(const CompInt&) = delete;
 	CompInt& operator=(const CompInt&) = delete;
 
-	
-
 	const char* ClassName() const { return "CompIntClass"; }
 	LRESULT CALLBACK HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// Main window procedure for CompInt class.
@@ -28,6 +26,13 @@ public:
 	// Subclass input box procedure for handling input messages to enable TAB key navigation.
 	// Each input box is subclassed and intercepted by the TAB key in their respective window procedure.
 	// This allows the focus to be set manually to the next input box.
+
+	static LRESULT CALLBACK ButtonProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	// Subclass button procedure for handling button messages.
+
+	void HandleTabNavigation(HWND currentControl, bool shiftDown);
+	// Handles TAB key navigation between input controls.
+
 
 	static CompInt& InstCompIntWnd();
 	// Singleton to instantiate an object only once.

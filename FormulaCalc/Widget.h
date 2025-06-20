@@ -7,14 +7,14 @@
 
 namespace Widget
 {
-	// Define the dialog data structure properly
+	// Static modal dialog data structure.
 	struct DialogData
 	{
 		const char* title; // Title of the dialog.
-		const char* message;
-		const char* imagePath;
-		int width;
-		int height;
+		const char* message;	// Message to display in the dialog.
+		const char* imagePath;	// Path to the image file to display in the dialog.
+		int width;	// Width of the dialog.
+		int height;	// Height of the dialog.
 	};
 
 	// label controls.
@@ -52,7 +52,7 @@ namespace Widget
 	HWND CreateWnd(int posx, int posy, int width, int height, const char* name, const char* className, 
 			WNDPROC wndProc, WNDCLASSEX& wcex, HINSTANCE& hInst, int nCmdShow);
 
-	// Add this to Widget.h
+	// Static modal dialog creation.
 	INT_PTR StaticModalDialog(HWND hParent, const char* title, const char* message,
 		const char* imagePath = nullptr,
 		int width = 400, int height = 200);

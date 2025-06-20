@@ -203,8 +203,11 @@ HWND Widget::Button(int posx, int posy, int width, int height, const char* text,
 	HWND Btn_hWnd = CreateWindow(
 		"BUTTON",
 		text,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-		posx, posy, width, height, hWnd, option, nullptr, nullptr);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
+		posx, posy, width, height, 
+		hWnd, option, 
+		(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+		nullptr);
 
 	// Error handling.
 	if (!Btn_hWnd)
@@ -434,25 +437,23 @@ INT_PTR Widget::StaticModalDialog(HWND hParent, const char* title, const char* m
 		return -1;
 
 	// Define dialog template
-	pDlgTemplate->style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_CENTER;
+	pDlgTemplate->style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME; // | DS_CENTER;
 	pDlgTemplate->dwExtendedStyle = 0;
 	pDlgTemplate->cdit = 0;
-	pDlgTemplate->x = 0;
-	pDlgTemplate->y = 0;
+	pDlgTemplate->x = 50;	// Position of the dialog on the screen.
+	pDlgTemplate->y = 50;
 	pDlgTemplate->cx = width;
 	pDlgTemplate->cy = height;
-
-	// Dialog data
-	struct 
-	{
-		const char* title;
-		const char* message;
-		const char* imagePath;
-		int width;
-		int height;
-	} 
 	
-	dlgData = { title, message, imagePath, width, height };	// Initialize dialog data.
+	// Initialize dialog data.
+	DialogData dlgData = 
+	{ 
+		title, 
+		message, 
+		imagePath, 
+		width, 
+		height 
+	};
 
 	// Create and show the dialog
 	INT_PTR result = DialogBoxIndirectParam(

@@ -113,10 +113,19 @@ LRESULT CompInt::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     switch (uMsg)
     {
+        case WM_GETDLGCODE:
+			return DLGC_WANTALLKEYS | DLGC_WANTTAB; // Allow TAB key navigation.
+
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
         int wmEvent = HIWORD(wParam);
+
+		// Add focus handling for buttons.
+        if (wmEvent == BN_SETFOCUS)
+        {
+            return 0;
+        }
 
         if (wmId == COMPINT_COMBOBOX_CALC && wmEvent == CBN_SELCHANGE)
             CalcCommand(m_hWnd, wParam, lParam);
@@ -209,36 +218,9 @@ LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		// If the instance is valid, proceed with input box navigation.
         if (pThis)
         {
-			// Check if the SHIFT key is pressed to determine the direction of navigation.
-            HWND inputs[] = { pThis->hInPrincipal, pThis->hInAccAmount, pThis->hInIntAmount, pThis->hInAnnRate, pThis->hInTime };
-			const int numInputs = sizeof(inputs) / sizeof(inputs[0]);   // Number of input controls.
-
-			// Find the index of the current input control that has focus.
-            for (int i = 0; i < numInputs; ++i)
-            {
-				// Check if the current input control matches the one that has focus.
-                if (inputs[i] == hwnd)
-                {
-					bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0; // Check if SHIFT is pressed.
-					int dir = shiftDown ? -1 : 1;   // Determine direction based on SHIFT key.
-
-					// Find the next input control to focus on.
-                    for (int j = 1; j <= numInputs; ++j)
-                    {
-						int idx = (i + dir * j + numInputs) % numInputs;    // Wrap around the index.
-
-						// Check if the next input is visible and enabled
-                        if (inputs[idx] && IsWindowVisible(inputs[idx]) && IsWindowEnabled(inputs[idx]))
-                        {
-							SetFocus(inputs[idx]);  // Set focus to the next input.
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-
-            return 0; // Handled
+            bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+            pThis->HandleTabNavigation(hwnd, shiftDown);
+            return 0;
         }
     }
 
@@ -312,6 +294,86 @@ LRESULT CompInt::InputBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 }
 
+LRESULT CompInt::ButtonProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == WM_GETDLGCODE)
+    {
+        return DLGC_WANTALLKEYS; // Allow keyboard input for buttons
+    }
+
+    if (msg == WM_KEYDOWN)
+    {
+        if (wParam == VK_TAB)
+        {
+            HWND hParent = GetParent(hwnd);
+            CompInt* pThis = reinterpret_cast<CompInt*>(GetWindowLongPtr(hParent, GWLP_USERDATA));
+
+            if (pThis)
+            {
+                bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+                pThis->HandleTabNavigation(hwnd, shiftDown);
+                return 0;
+            }
+        }
+    }
+
+    // Retrieve the original window proc from the property
+    WNDPROC oldProc = (WNDPROC)GetProp(hwnd, TEXT("OldButtonProc"));
+    return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+
+}
+
+void CompInt::HandleTabNavigation(HWND currentControl, bool shiftDown)
+{
+    HWND controls[] = 
+    {
+        hInPrincipal,
+        hInAccAmount,
+        hInIntAmount,
+        hInAnnRate,
+        hInTime,
+        hBtnCalcAcc,
+        hBtnCalcPrincA,
+        hBtnCalcPrincI,
+        hBtnCalcRate,
+        hBtnCalcTime,
+        hBtnClear,
+        hBtnClose
+    };
+
+    const int numControls = sizeof(controls) / sizeof(controls[0]);
+    int currentIndex = -1;
+
+    // Find current control
+    for (int i = 0; i < numControls; i++)
+    {
+        if (controls[i] == currentControl)
+        {
+            currentIndex = i;
+            break;
+        }
+    }
+
+    if (currentIndex != -1)
+    {
+        // Calculate next control index
+        int direction = shiftDown ? -1 : 1;
+
+        for (int j = 1; j <= numControls; j++)
+        {
+            int nextIndex = (currentIndex + direction * j + numControls) % numControls;
+
+            if (controls[nextIndex] &&
+                IsWindowVisible(controls[nextIndex]) &&
+                IsWindowEnabled(controls[nextIndex]))
+            {
+                SetFocus(controls[nextIndex]);
+                break;
+            }
+        }
+    }
+}
+
 CompInt& CompInt::InstCompIntWnd()
 {
     static CompInt inst;
@@ -379,16 +441,35 @@ void CompInt::CompIntInterface()
     // Result Box. 
     hRsltCompInt = Widget::ResultBox(180, 300, 110, 30, m_hWnd);
 
-    // Buttons.
-    hBtnClear = Widget::Button(430, 210, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
-    hBtnClose = Widget::Button(430, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
-
 	// Calculate Buttons.
     hBtnCalcAcc = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_ACCRUED_BUTTON);
     hBtnCalcPrincA = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCA_BUTTON);
     hBtnCalcPrincI = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_PRINCI_BUTTON);
     hBtnCalcRate = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_RATE_BUTTON);
     hBtnCalcTime = Widget::Button(430, 140, 90, 30, "Calculate", m_hWnd, (HMENU)COMPINT_TIME_BUTTON);
+
+    // Other Buttons.
+    hBtnClear = Widget::Button(430, 210, 90, 30, "Clear", m_hWnd, (HMENU)COMPINT_CLEAR_BUTTON);
+    hBtnClose = Widget::Button(430, 260, 90, 30, "Close", m_hWnd, (HMENU)COMPINT_CLOSE_BUTTON);
+
+    // After creating the buttons, subclass them
+    // Calculate Buttons
+    SetProp(hBtnCalcAcc, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnCalcAcc, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+    SetProp(hBtnCalcPrincA, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnCalcPrincA, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+    SetProp(hBtnCalcPrincI, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnCalcPrincI, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+    SetProp(hBtnCalcRate, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnCalcRate, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+    SetProp(hBtnCalcTime, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnCalcTime, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+
+    // Other Buttons
+    SetProp(hBtnClear, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnClear, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
+    SetProp(hBtnClose, TEXT("OldButtonProc"),
+        (HANDLE)SetWindowLongPtr(hBtnClose, GWLP_WNDPROC, (LONG_PTR)&CompInt::ButtonProc));
 
     if(!accruedInterface)
     {
